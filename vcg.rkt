@@ -2,9 +2,7 @@
 
 (require "while.rkt")
 
-
-
-;; TODO:
+;; TODO: logical variables
 
 ;; e[x → t]
 (define (subst/exp e x t)

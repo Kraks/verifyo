@@ -133,4 +133,14 @@
                 (y := (y - 2))))
     {assert (y = 0)}))
 
-;(interp example1 '((x . 8) (y . 16)))
+(define fact
+  '({assume}
+    (seq (y := 1)
+         (while (¬ (x = 1))
+                {invariant}
+                (seq (y := (y * x))
+                     (x := (x - 1)))))
+    {assert}))
+
+;(interp example1 '{(x . 8) (y . 16)})
+(interp fact '{(x . 5)})
