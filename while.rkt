@@ -10,7 +10,9 @@
         | (<exp> + <exp>) | (<exp> - <exp>)
         | (<exp> * <exp>) | (<exp> / <exp>)
 
-<pred> ::= true | false
+<bval> ::= true | false
+
+<pred> ::= <bval>
          | (<exp> = <exp>)
          | (<exp> ≤ <exp>) | (<exp> < <exp>)
          | (<exp> ≥ <exp>) | (<exp> > <exp>)
@@ -27,6 +29,8 @@
             | (while <pred> <annotation> <command>)
             | (skip)
 |#
+
+(provide (all-defined-out))
 
 (define lookup
   (λ (σ x)
@@ -64,6 +68,7 @@
        (/ (eval/exp e1 σ)
           (eval/exp e2 σ))])))
 
+; eval/pred : pred σ -> bval
 (define eval/pred
   (λ (pred σ)
     (match pred
@@ -128,4 +133,4 @@
                 (y := (y - 2))))
     {assert (y = 0)}))
 
-(interp example1 '((x . 8) (y . 16)))
+;(interp example1 '((x . 8) (y . 16)))
