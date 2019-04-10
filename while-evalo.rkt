@@ -4,18 +4,22 @@
 (require minikanren)
 (require minikanren/numbers)
 
+(provide (all-defined-out))
+
 (define succeed (== #f #f))
-(define fail (== #f #t))
+
+(define int
+  (λ (x) `(int ,(build-num x))))
 
 (define lookupo
   (λ (σ x v)
     (conde
      [(fresh (x^ v^ rest)
-             (== `((,x^ . ,v^) . ,rest) σ)
+             (== `((,x^ ↦ ,v^) . ,rest) σ)
              (== x x^)
              (== v v^))]
      [(fresh (x^ v^ rest)
-             (== `((,x^ . ,v^) . ,rest) σ)
+             (== `((,x^ ↦ ,v^) . ,rest) σ)
              (=/= x x^)
              (lookupo rest x v))])))
 
@@ -23,41 +27,16 @@
   (λ (σ x v σ^)
     (conde
      [(== '() σ)
-      (== `((,x . ,v)) σ^)]
+      (== `((,x ↦ ,v)) σ^)]
      [(fresh (x^ v^ rest)
-             (== `((,x^ . ,v^) . ,rest) σ)
+             (== `((,x^ ↦ ,v^) . ,rest) σ)
              (== x x^)
-             (== `((,x . ,v) . ,rest) σ^))]
+             (== `((,x ↦ ,v) . ,rest) σ^))]
      [(fresh (x^ v^ rest σ*)
-             (== `((,x^ . ,v^) . ,rest) σ)
+             (== `((,x^ ↦ ,v^) . ,rest) σ)
              (=/= x x^)
              (updateo rest x v σ*)
-             (== `((,x^ . ,v^) . ,σ*) σ^))])))
-
-(check-equal?
- (run 1 (q)
-      (lookupo '((a . 1)) 'a q))
- '(1))
-(check-equal?
- (run 1 (q)
-      (lookupo '((b . 2) (a . 1)) 'a q))
- '(1))
-(check-equal?
- (run 1 (q)
-      (lookupo '((a . 1)) 'b q))
- '())
-(check-equal?
- (run 1 (q)
-      (updateo '() 'a 1 q))
- '(((a . 1))))
-(check-equal?
- (run 1 (q)
-      (updateo '((a . 2)) 'a 2 q))
- '(((a . 2))))
-(check-equal?
- (run 1 (q)
-      (updateo '((a . 1)) 'b 2 q))
- '(((a . 1) (b . 2))))
+             (== `((,x^ ↦ ,v^) . ,σ*) σ^))])))
 
 (define eval/predo
   (λ (p σ v)
@@ -157,72 +136,19 @@
              (eval/expo e2 σ `(int ,v2))
              (/o v1 v2 v ans)
              (== v `(int ,ans)))])))
-
-(define int
-  (λ (x) `(int ,(build-num x))))
-
-(check-equal?
- (run 1 (q) (eval/expo (int 1) '() q))
- '((int (1)))
- )
-(check-equal?
- (run 1 (q)
-      (eval/expo 'a '((a . 1)) q))
- '(1))
-(check-equal?
- (run 1 (q)
-      (eval/expo 'b '((a . 1) (b . 2)) q))
- '(2))
-(check-equal?
- (run 1 (q)
-      (eval/expo '(a + b) `((a . ,(int 3)) (b . ,(int 3))) q))
- '((int (0 1 1)))
- )
-(check-equal?
- (run 1 (q)
-      (eval/expo '(a + b) `((a . ,q) (b . ,(int 3))) (int 6)))
- '((int (1 1)))
- )
-(check-equal?
- (run 1 (q)
-      (eval/expo `(,q + b) `((b . ,(int 3))) (int 6)))
- '((int (1 1)))
- )
-(check-equal?
- (run 1 (q)
-      (eval/predo 'true '() q))
- '(#t))
-(check-equal?
- (run 1 (q)
-      (eval/predo 'false '() q))
- '(#f))
-(check-equal?
- (run 1 (q)
-      (eval/predo '(¬ true) '() q))
- '(#f))
-(check-equal?
- (run 1 (q)
-      (eval/predo '(1 = 2) '() q))
- '(#f))
-(check-equal?
- (run 1 (q) (eval/predo '(3 = 3) '() q))
- '(#t))
-(check-equal?
- (run 1 (q)
-      (eval/predo `((,(int 1) + ,(int 2)) = ,(int 3)) '() q))
- '(#t))
-
+            
 (define execo
   (λ (com σ σ^)
     (conde
      [(fresh (x e v)
              (== com `(,x := ,e))
              (eval/expo e σ v)
+             ;(== σ^ v))]
              (updateo σ x v σ^))]
      [(fresh (c1 c2 σ*)
              (== com `(seq ,c1 ,c2))
-             (== execo c1 σ σ*)
-             (== execo c2 σ* σ^))]
+             (execo c1 σ σ*)
+             (execo c2 σ* σ^))]
      [(fresh (c cv t e)
              (== com `(if ,c ,t ,e))
              (eval/predo c σ cv)
@@ -231,11 +157,10 @@
               [(== cv #f) (execo e σ σ^)]))]
      [(fresh (c cv i body σ*)
              (== com `(while ,c ,i ,body))
-             (== eval/predo c σ cv)
+             (eval/predo c σ cv)
              (conde
               [(== cv #t)
                (execo body σ σ*)
                (execo com σ* σ^)]
               [(== cv #f) (== σ σ^)]))]
-     [(== com `(skip))
-      (== σ σ^)])))
+     [(== com `(skip)) (== σ σ^)])))
