@@ -79,15 +79,15 @@
              (eval/predo `(,e2 < ,e2) σ v))]
      [(fresh (e1 e2 v1 v2)
              (== p `(,e1 < ,e2))
-             (eval/expo e1 σ v1)
-             (eval/expo e2 σ v2)
+             (eval/expo e1 σ `(int ,v1))
+             (eval/expo e2 σ `(int ,v2))
              (conde
               [(<o v1 v2) (== v #t)]
               [(<=o v2 v1) (== v #f)]))]
      [(fresh (e1 e2 v1 v2)
              (== p `(,e1 <= ,e2))
-             (eval/expo e1 σ v1)
-             (eval/expo e2 σ v2)
+             (eval/expo e1 σ `(int ,v1))
+             (eval/expo e2 σ `(int ,v2))
              (conde
               [(<=o v1 v2) (== v #t)]
               [(<o v2 v1) (== v #f)]))]
@@ -160,7 +160,6 @@
 
 (define int
   (λ (x) `(int ,(build-num x))))
-
 
 (check-equal?
  (run 1 (q) (eval/expo (int 1) '() q))
