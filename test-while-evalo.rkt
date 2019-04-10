@@ -157,8 +157,57 @@
              q))
  '(((x ↦ (int (1 0 0 1))))))
 
+;; Note: if we reorder the absento constraint,
+;; we will obtain different q.
+
+(check-equal?
  (run 1 (q)
+      (absento 'int q)
       (execo `(seq (x := (x + ,(int 1)))
                    (x := ,q))
              `((x ↦ ,(int 2)))
              `((x ↦ ,(int 9)))))
+ '((x + (x + x))))
+
+(check-equal?
+ (run 1 (q)
+      (execo `(seq (x := (x + ,(int 1)))
+                   (x := ,q))
+             `((x ↦ ,(int 2)))
+             `((x ↦ ,(int 9))))
+      (absento 'int q))
+ '((x * x)))
+
+;; We can also synthesize with two input/output examples.
+(check-equal?
+ (run 1 (q)
+      (execo `(seq (x := (x + ,(int 1)))
+                   (x := ,q))
+             `((x ↦ ,(int 2)))
+             `((x ↦ ,(int 9))))
+      (execo `(seq (x := (x + ,(int 1)))
+                   (x := ,q))
+             `((x ↦ ,(int 3)))
+             `((x ↦ ,(int 16))))
+      (absento 'int q))
+ '((x * x)))
+
+;; TODO: now get into trouble!
+;; Random ideas: improve the relation arithmetic system
+;;               SMT solver to discharge the arithmetic constraints
+(run 1 (q)
+      (execo `(seq (x := ,q)
+                   (x := (x * x)))
+             `((x ↦ ,(int 2)))
+             `((x ↦ ,(int 9))))
+      #|
+      (execo `(seq (x := ,q)
+                   (x := (x * x)))
+             `((x ↦ ,(int 3)))
+             `((x ↦ ,(int 16))))
+      (execo `(seq (x := ,q)
+                   (x := (x * x)))
+             `((x ↦ ,(int 1)))
+             `((x ↦ ,(int 4))))
+      |#
+      (absento 'int q))

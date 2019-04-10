@@ -143,7 +143,6 @@
      [(fresh (x e v)
              (== com `(,x := ,e))
              (eval/expo e σ v)
-             ;(== σ^ v))]
              (updateo σ x v σ^))]
      [(fresh (c1 c2 σ*)
              (== com `(seq ,c1 ,c2))
