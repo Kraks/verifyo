@@ -1,3 +1,0 @@
-[submodule "faster-miniKanren"]
-	path = faster-miniKanren
-	url = https://github.com/miniKanren/faster-miniKanren.git
