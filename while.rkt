@@ -143,4 +143,4 @@
     {assert}))
 
 ;(interp example1 '{(x . 8) (y . 16)})
-(interp fact '{(x . 5)})
+;(interp fact '{(x . 5)})
