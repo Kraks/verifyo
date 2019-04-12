@@ -111,7 +111,7 @@
              (== `(int ,n) e)
              (== e v))]
      [(symbolo e) (lookupo σ e v)]
-     [(numbero e) (== v e)]
+     ;[(numbero e) (== v e)]
      [(fresh (e1 e2 v1 v2 ans)
              (== e `(,e1 + ,e2))
              (eval/expo e1 σ `(int ,v1))
@@ -163,3 +163,18 @@
                (execo com σ* σ^)]
               [(== cv #f) (== σ σ^)]))]
      [(== com `(skip)) (== σ σ^)])))
+
+(run 1 (q)
+      (execo `(seq (x := (x + ,q))
+                   (x := (x * x)))
+             `((x ↦ ,(int 2)))
+             `((x ↦ ,(int 9))))
+      (execo `(seq (x := ,q)
+                   (x := (x * x)))
+             `((x ↦ ,(int 3)))
+             `((x ↦ ,(int 16))))
+      (execo `(seq (x := ,q)
+                   (x := (x * x)))
+             `((x ↦ ,(int 1)))
+             `((x ↦ ,(int 4))))
+      (absento 'int q))
