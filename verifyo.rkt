@@ -7,13 +7,21 @@
 (require "while.rkt")
 (require "smt.rkt")
 
-(define verifyo
-  (lambda (P com Q)
+;; Idea 1: relation verification condition generator
+
+; e[x -> t] = res
+(define substo
+  (lambda (e x t res)
+    (conde
+     [(== 
+
+(define wpo
+  (lambda (com post wp sc)
     (conde
      [(fresh (x e v)
              (== com `(,x := ,e))
-            )]
-     [(fresh (c1 c2 σ*)
+             (substo post x e wp))]
+     [(fresh (c1 c2)
              (== com `(seq ,c1 ,c2))
              )]
      [(fresh (c cv t e)
