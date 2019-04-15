@@ -85,6 +85,9 @@
  (run 1 (q)
       (eval/predo '(¬ true) '() q))
  '(#f))
+
+;; Commented: not support non-relational numbers.
+#|
 (check-equal?
  (run 1 (q)
       (eval/predo '(1 = 2) '() q))
@@ -92,6 +95,8 @@
 (check-equal?
  (run 1 (q) (eval/predo '(3 = 3) '() q))
  '(#t))
+|#
+
 (check-equal?
  (run 1 (q)
       (eval/predo `((,(int 1) + ,(int 2)) = ,(int 3)) '() q))
@@ -179,6 +184,7 @@
  '((x * x)))
 
 ;; We can also synthesize with two input/output examples.
+;; Note: this is slower.
 (check-equal?
  (run 1 (q)
       (execo `(seq (x := (x + ,(int 1)))
@@ -192,22 +198,33 @@
       (absento 'int q))
  '((x * x)))
 
-;; TODO: now get into trouble!
-;; Random ideas: improve the relation arithmetic system
-;;               SMT solver to discharge the arithmetic constraints
-(run 1 (q)
+(check-equal?
+ (run 1 (q)
+      (execo `(seq (x := (x + ,q))
+                   (x := (x * x)))
+             `((x ↦ ,(int 2)))
+             `((x ↦ ,(int 9)))))
+ '((int (1))))
+
+;; Overfitted on the input/output example
+;; x := 3; x = x * x
+(check-equal?
+ (run 1 (q)
+      (execo `(seq (x := ,q)
+                   (x := (x * x)))
+             `((x ↦ ,(int 2)))
+             `((x ↦ ,(int 9)))))
+ '((int (1 1))))
+
+;; Correct, given another input/output example
+(check-equal?
+ (run 1 (q)
       (execo `(seq (x := ,q)
                    (x := (x * x)))
              `((x ↦ ,(int 2)))
              `((x ↦ ,(int 9))))
-      #|
       (execo `(seq (x := ,q)
                    (x := (x * x)))
              `((x ↦ ,(int 3)))
-             `((x ↦ ,(int 16))))
-      (execo `(seq (x := ,q)
-                   (x := (x * x)))
-             `((x ↦ ,(int 1)))
-             `((x ↦ ,(int 4))))
-      |#
-      (absento 'int q))
+             `((x ↦ ,(int 16)))))
+ '(((int (1)) + x)))
