@@ -5,7 +5,10 @@
 (require minikanren/numbers)
 
 (require "while.rkt")
+(require "while-evalo.rkt")
 (require "smt.rkt")
+
+(provide (all-defined-out))
 
 ;; Idea 1: relation verification condition generator
 
@@ -14,8 +17,9 @@
 (define substo/exp
   (lambda (e x t res)
     (conde
-     [(numbero e)
-      (== res e)]
+     [(fresh (n)
+             (== `(int ,n) e)
+             (== e res))]
      [(symbolo e)
       (== e x)
       (== t res)]
@@ -43,21 +47,6 @@
              (substo/exp e2 x t s2)
              (== res `(,s1 / ,s2)))]
      )))
-
-(check-equal?
- (run 1 (q) (substo/exp 1 'a 'b q)) '(1))
-
-(check-equal?
- (run 1 (q) (substo/exp 'c 'a 'b q)) '(c))
-
-(check-equal?
- (run 1 (q) (substo/exp 'a 'a 'b q)) '(b))
-
-(check-equal?
- (run 1 (q) (substo/exp '(a + b) 'a 'c q)) '((c + b)))
-
-(check-equal?
- (run 1 (q) (substo/exp q 'a 'c '(c + b))) '((a + b)))
 
 ; Substitution for predicates
 ; p[x -> t] = res
@@ -110,22 +99,6 @@
              (== p `(¬ ,p1))
              (== res `(¬ ,p1))
              (substo p1 x t s1))])))
-
-(check-equal?
- (run 1 (q) (substo '((a + b) = (b + c)) 'b 1 q))
- '(((a + 1) = (1 + c))))
-
-(check-equal?
- (run 1 (q) (substo q 'b 'c '((a + 1) = (d + c))))
- '(((a + 1) = (d + b))))
-
-(check-equal?
- (run 1 (q) (substo q 'b 'c '((a + 1) = (d + c))))
- '(((a + 1) = (d + b))))
-
-(check-equal?
- (run 1 (q) (substo q 'b 'c '((a + c) = (d + c))))
- '(((a + b) = (d + b))))
 
 (define wpo
   (lambda (com post wp sc)

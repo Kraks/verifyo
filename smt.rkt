@@ -27,7 +27,7 @@
         (write-char #\newline out))))
   (define output
     (string-split
-     (with-output-to-string (λ() (system (string-append "z3 " filename)))) "\n"))
+     (with-output-to-string (λ () (system (string-append "z3 " filename)))) "\n"))
   (equal? (car output) "unsat"))
 
 (define (valido query)
