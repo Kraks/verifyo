@@ -61,6 +61,13 @@
     [`(skip)
      (values post sc)]))
 
+(wp '(while (x > 0)
+           {invariant ((y = (2 * x)) ∧ (x ≥ 0))}
+           (seq (x := (x - 1))
+                (y := (y - 2))))
+    '(y = 0)
+    '())
+
 (define (vcg/helper pre com post)
   (define-values (pre* sc) (wp com post '()))
   (define query (cons `(,pre ⇒ ,pre*) sc))
@@ -154,4 +161,10 @@
   (define asserts (map assert-valid queries))
   (append declares (foldl append '() asserts)))
 
+#|
 (verify/smt example1)
+
+(wp `(if (a = b) (a := 3) (b := 4))
+    `((a = 3) ∨ (b = 4))
+    '())
+|#

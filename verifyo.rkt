@@ -100,19 +100,38 @@
              (== res `(¬ ,p1))
              (substo p1 x t s1))])))
 
+(define appendo
+  (lambda (l s out)
+    (conde
+     [(== '() l) (== s out)]
+     [(fresh (a d res)
+             (== `(,a . ,d) l)
+             (== `(,a . ,res) out)
+             (appendo d s res))])))
+
+;; WP vs SP
+
 (define wpo
   (lambda (com post wp sc)
     (conde
      [(fresh (x e v)
              (== com `(,x := ,e))
              (substo post x e wp))]
-     [(fresh (c1 c2)
+     [(fresh (c1 c2 c2-wp c2-sc c1-sc)
              (== com `(seq ,c1 ,c2))
-             )]
-     [(fresh (c cv t e)
+             (wpo c2 post c2-wp c2-sc)
+             (wpo c1 c2-wp wp c1-sc)
+             (appendo c1-sc c2-sc sc))]
+     [(fresh (c t e t-wp e-wp t-sc e-sc)
              (== com `(if ,c ,t ,e))
-             )]
-     [(fresh (c cv i body σ*)
-             (== com `(while ,c ,i ,body))
-             )]
+             (wpo t post t-wp t-sc)
+             (wpo e post e-wp e-sc)
+             (== wp `((,c ⇒ ,t-wp) ∧ ((¬ ,c) ⇒ ,e-wp)))
+             (appendo t-sc e-sc sc))]
+     [(fresh (cnd inv body body-wp body-sc)
+             (== com `(while ,cnd (invariant ,inv) ,body))
+             (wpo body inv body-wp body-sc)
+             (== wp inv)
+             ;; NOTE: post has no constraint!
+             (appendo body-sc `(((,inv ∧ ,cnd) ⇒ ,body-wp) ((,inv ∧ (¬ ,cnd)) ⇒ ,post)) sc))]
      [(== com `(skip))])))
