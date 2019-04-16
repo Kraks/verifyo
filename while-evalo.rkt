@@ -164,3 +164,29 @@
              (eval/predo c σ cv))]
      [(== com `(skip)) (== σ σ^)])))
 
+(run 1 (q)
+     (execo
+      `(seq (y := ,(int 1))
+            (while (¬ (x = ,(int 1)))
+                   {invariant}
+                   (seq ,q
+                        (x := (x - ,(int 1))))))
+      `[(x ↦ ,(int 5))]
+      `[(x ↦ ,(int 1)) (y ↦ ,(int 120))])
+     (execo
+      `(seq (y := ,(int 1))
+            (while (¬ (x = ,(int 1)))
+                   {invariant}
+                   (seq ,q
+                        (x := (x - ,(int 1))))))
+      `[(x ↦ ,(int 4))]
+      `[(x ↦ ,(int 1)) (y ↦ ,(int 24))])
+     (execo
+      `(seq (y := ,(int 1))
+            (while (¬ (x = ,(int 1)))
+                   {invariant}
+                   (seq ,q
+                        (x := (x - ,(int 1))))))
+      `[(x ↦ ,(int 2))]
+      `[(x ↦ ,(int 1)) (y ↦ ,(int 2))])
+     (absento 'int q))

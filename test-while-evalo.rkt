@@ -229,3 +229,41 @@
              `((x ↦ ,(int 16)))))
  '(((int (1)) + x)))
 
+(check-equal?
+ (run 1 (q)
+      (execo
+       `(seq (y := ,(int 1))
+             (while (¬ (x = ,(int 1)))
+                    {invariant}
+                    (seq (y := (y * x))
+                         (x := (x - ,(int 1))))))
+       `[(x ↦ ,(int 5))]
+       q))
+ '(((x ↦ (int (1))) (y ↦ (int (0 0 0 1 1 1 1))))))
+
+(check-equal?
+ (run 1 (q)
+      (execo
+       `(seq (y := ,(int 1))
+             (while (¬ (x = ,q))
+                    {invariant}
+                    (seq (y := (y * x))
+                         (x := (x - ,(int 1))))))
+       `[(x ↦ ,(int 5))]
+       `[(x ↦ ,(int 1)) (y ↦ ,(int 120))]))
+ '((int (1))))
+
+;; Note: assuming that input x is always ge than 0.
+(check-equal?
+ (run 1 (q)
+      (execo
+       `(seq (y := ,(int 1))
+             (while ,q
+                    {invariant}
+                    (seq (y := (y * x))
+                         (x := (x - ,(int 1))))))
+       `[(x ↦ ,(int 5))]
+       `[(x ↦ ,(int 1)) (y ↦ ,(int 120))]))
+ '(((int (1)) < x)))
+
+
