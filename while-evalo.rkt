@@ -156,12 +156,12 @@
              (eval/predo c σ cv))]
      [(fresh (c cv i body σ*)
              (== com `(while ,c ,i ,body))
+             (eval/predo c σ cv)
              (conde
               [(== cv #t)
                (execo body σ σ*)
                (execo com σ* σ^)]
-              [(== cv #f) (== σ σ^)])
-             (eval/predo c σ cv))]
+              [(== cv #f) (== σ σ^)]))]
      [(== com `(skip)) (== σ σ^)])))
 
 (run 1 (q)
