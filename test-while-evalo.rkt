@@ -245,6 +245,18 @@
  (run 1 (q)
       (execo
        `(seq (y := ,(int 1))
+             (while (¬ (x = ,(int 1)))
+                    {invariant}
+                    (seq (y := (y * x))
+                         (x := (x - ,(int 1))))))
+       `[(x ↦ ,q)]
+       `[(x ↦ ,(int 1)) (y ↦ ,(int 120))]))
+ '((int (1 0 1))))
+
+(check-equal?
+ (run 1 (q)
+      (execo
+       `(seq (y := ,(int 1))
              (while (¬ (x = ,q))
                     {invariant}
                     (seq (y := (y * x))
@@ -265,5 +277,3 @@
        `[(x ↦ ,(int 5))]
        `[(x ↦ ,(int 1)) (y ↦ ,(int 120))]))
  '(((int (1)) < x)))
-
-

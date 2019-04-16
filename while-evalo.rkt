@@ -50,12 +50,14 @@
               [(=/= v1 v2) (== v #f)])
              (eval/expo e1 σ v1)
              (eval/expo e2 σ v2))]
+     #|
      [(fresh (e1 e2)
              (== p `(,e1 > ,e2))
              (eval/predo `(,e2 <= ,e1) σ v))]
      [(fresh (e1 e2)
              (== p `(,e1 >= ,e2))
              (eval/predo `(,e2 < ,e2) σ v))]
+     |#
      [(fresh (e1 e2 v1 v2)
              (== p `(,e1 < ,e2))
              (conde
@@ -87,7 +89,7 @@
               [(== v1 #f) (== v2 #t) (== v #t)]
               [(== v1 #f) (== v2 #f) (== v #f)])
              (eval/predo p1 σ v1)
-             (eval/predo p2 σ v2))];;TODO: could be optimized by shortcut
+             (eval/predo p2 σ v2))]  ;;TODO: could be optimized by shortcut
      [(fresh (p1 p2 v1 v2)
              (== p `(,p1 ⇒ ,p2))
              (conde
@@ -156,37 +158,38 @@
              (eval/predo c σ cv))]
      [(fresh (c cv i body σ*)
              (== com `(while ,c ,i ,body))
-             (eval/predo c σ cv)
              (conde
               [(== cv #t)
                (execo body σ σ*)
                (execo com σ* σ^)]
-              [(== cv #f) (== σ σ^)]))]
+              [(== cv #f) (== σ σ^)])
+             (eval/predo c σ cv))]
      [(== com `(skip)) (== σ σ^)])))
 
+#|
 (run 1 (q)
      (execo
       `(seq (y := ,(int 1))
-            (while (¬ (x = ,(int 1)))
+            (while (,(int 1) < x)
                    {invariant}
-                   (seq ,q
+                   (seq (y := ,q)
                         (x := (x - ,(int 1))))))
       `[(x ↦ ,(int 5))]
       `[(x ↦ ,(int 1)) (y ↦ ,(int 120))])
      (execo
       `(seq (y := ,(int 1))
-            (while (¬ (x = ,(int 1)))
+            (while (,(int 1) < x)
                    {invariant}
-                   (seq ,q
+                   (seq (y := ,q)
                         (x := (x - ,(int 1))))))
       `[(x ↦ ,(int 4))]
       `[(x ↦ ,(int 1)) (y ↦ ,(int 24))])
      (execo
       `(seq (y := ,(int 1))
-            (while (¬ (x = ,(int 1)))
+            (while (,(int 1) < x)
                    {invariant}
-                   (seq ,q
+                   (seq (y := ,q)
                         (x := (x - ,(int 1))))))
-      `[(x ↦ ,(int 2))]
-      `[(x ↦ ,(int 1)) (y ↦ ,(int 2))])
-     (absento 'int q))
+      `[(x ↦ ,(int 3))]
+      `[(x ↦ ,(int 1)) (y ↦ ,(int 6))]))
+|#
