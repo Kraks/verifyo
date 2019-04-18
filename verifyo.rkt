@@ -11,6 +11,7 @@
 (provide (all-defined-out))
 
 ;; Idea 1: relation verification condition generator
+;; TODO: WP vs SP
 
 ; Substitution for expressions
 ; e[x -> t] = res
@@ -109,8 +110,6 @@
              (== `(,a . ,res) out)
              (appendo d s res))])))
 
-;; WP vs SP
-
 (define wpo
   (lambda (com post wp sc)
     (conde
@@ -134,4 +133,5 @@
              (== wp inv)
              ;; NOTE: post has no constraint!
              (appendo body-sc `(((,inv ∧ ,cnd) ⇒ ,body-wp) ((,inv ∧ (¬ ,cnd)) ⇒ ,post)) sc))]
-     [(== com `(skip))])))
+     [(== com `(skip))
+      (== post wp)])))
