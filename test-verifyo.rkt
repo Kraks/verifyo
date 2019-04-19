@@ -109,7 +109,9 @@
       (((y - (int (0 1))) = ((int (0 1)) * (x - (int (1))))) ∧ ((x - (int (1))) ≥ (int ()))))
      ((((y = ((int (0 1)) * x)) ∧ (x ≥ (int ()))) ∧ (¬ (x > (int ())))) ⇒ (y = (int ())))))))
 
+;; A tiny synthesis example
+;; {x + 1 = 2} ??? {x = 2}
 (check-equal?
  (run 1 (com)
-     (wpo com `[x = ,(int 2)] `[(x + ,(int 1)) = ,(int 2)] '()))
+      (wpo com `[x = ,(int 2)] `[(x + ,(int 1)) = ,(int 2)] '()))
  '((x := (x + (int (1))))))
