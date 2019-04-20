@@ -1,3 +1,5 @@
+
+
 #lang racket
 
 (require rackunit)
@@ -141,11 +143,6 @@
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 
 ;; TODO
-(define norm≡
-  (lambda (p q)
-    (== p q)))
-
-;; TODO
 (define ==>
   (lambda (p q)
     (== p q)))
@@ -156,23 +153,8 @@
      [(fresh (x e pre^)
              (== com `(,x := ,e))
              (substo post x e pre^)
-             (conde
-              [(norm≡ pre^ pre)]
-              [(==> pre pre^)]))] ; might be a strengthed precondition
+             (==> pre pre^))] ; might be a strengthed precondition
      )))
-
-(define valido
-  (lambda (p r)
-    (conde
-     [(== p 'true)
-      (== r #t)]
-     [(== p 'false)
-      (== r #f)]
-     [(fresh (p1 p2 r1 r2)
-             (== p `(,p1 ∧ ,p2))
-             (valido p1 r1)
-             (valido p2 r2))])))
-             
 
 (define reflect/exp
   (lambda (e)
@@ -191,3 +173,43 @@
 (reflect/exp 1)
 (reflect/exp 5)
 (reflect '(1 = 2))
+
+;; true ⇒ false
+;; To check its validity (it is not), we transform it to true ∧ true
+(run 1 (q)
+     (== #t #t)
+     (== #t #t))
+
+;; true ⇒ true
+;; To check its validity (it is not), we transform it to true ∧ false
+(run 1 (q)
+     (== #t #t)
+     (== #t #f))
+
+;; false ⇒ true
+;; To check its validity, we transform it to false ∧ false
+(run 1 (q)
+     (== #t #f)
+     (== #t #f))
+
+;; false ⇒ false
+;; To check its validity, we transform it to false ∧ true
+(run 1 (q)
+     (== #t #f)
+     (== #t #t))
+
+;; 1 < x ⇒ 0 < x
+;; To check its validity, we transform it to 1 < x ∧ x <= 0.
+(run 1 (q)
+     (fresh (x)
+            (<o (build-num 1) x)
+            (<=o x (build-num 0))))
+
+;; x = y ∧ y = z ⇒ x = z
+;; To check its validity, we transform it to x = y ∧ y = z ∧ x =/= z
+(run 1 (q)
+     (fresh (x y z)
+            (== x y)
+            (== y z)
+            (=/= x z)))
+
