@@ -5,7 +5,10 @@
 (load "membero.scm")
 (set! allow-incomplete-search? #t)
 
-;; TODO: We need it to be pure
+(define uop '(not))
+(define bop '(= >= > < <= + - * and or))
+
+;; TODO: does it terminate?
 (define (normo p q)
   (conde
    [(fresh (r)
@@ -15,7 +18,84 @@
 
 ;; TODO
 (define (rewriteo p q)
-  (== p q))
+  (conde
+   ;; Reflexivity
+   [(fresh (x)
+           (== p `(= ,x ,x))
+           (== q 'true))]
+   [(fresh (x)
+           (== p `(>= ,x ,x))
+           (== q 'true))]
+   [(fresh (x)
+           (== p `(<= ,x ,x))
+           (== q 'true))]
+   ;; Congruence of unary operators
+   [(fresh (op p^ q^)
+           (== p `(,op ,p^))
+           (== q `(,op ,q^))
+           (membero op uop)
+           (rewriteo p^ q^))]
+   ;; Congruence of binary operators
+   [(fresh (op p1 p2 q1 q2)
+           (== p `(,op ,p1 ,p2))
+           (== q `(,op ,q1 ,q2))
+           (membero op bop)
+           (rewriteo p1 q1)
+           (rewriteo p2 q2))]
+   ;; Prefer right-associativity over left-associativity
+   [(fresh (p1 p2 p3)
+           (== p `(and (and ,p1 ,p2) ,p3))
+           (== q `(and ,p1 (and ,p2 ,p3))))]
+   [(fresh (p1 p2 p3)
+           (== p `(or (or ,p1 ,p2) ,p3))
+           (== q `(or ,p1 (or ,p2 ,p3))))]
+   ;; Unit laws
+   [(fresh (p^)
+           (conde
+            [(== p `(and true ,p^))
+             (== q p^)]
+            [(== p `(and ,p^ true))
+             (== q p^)]))]
+   [(fresh (p^)
+           (conde
+            [(== p `(or false ,p^))
+             (== q p^)]
+            [(== p `(or ,p^ false))
+             (== q p^)]))]
+   [(fresh (x)
+           (conde
+            [(== p `(+ (int ()) ,x))
+             (== q x)]
+            [(== p `(+ ,x (int ())))
+             (== q x)]))]
+   [(fresh (x)
+           (== p `(- ,x (int ())))
+           (== q x))]
+   [(fresh (x)
+           (conde
+            [(== p `(* (int (1)) ,x))
+             (== q x)]
+            [(== p `(* ,x (int (1))))
+             (== q x)]))]
+   ;; Zero laws
+   [(fresh (p^)
+           (conde
+            [(== p `(and false ,p^))
+             (== q 'false)]
+            [(== p `(and ,p^ false))
+             (== q 'false)]))]
+   [(fresh (p^)
+           (conde
+            [(== p `(or true ,p^))
+             (== q 'true)]
+            [(== p `(or ,p^ true))
+             (== q 'true)]))]
+   [(fresh (p^)
+           (conde
+            [(== p `(* (int ()) ,p^))
+             (== q (int 0))]
+            [(== p `(* ,p^ (int ())))
+             (== q (int 0))]))]))
 
 (define (substo* p x t q)
   (conde
@@ -29,12 +109,12 @@
    [(fresh (op p^ q^)
            (== p `(,op ,p^))
            (== q `(,op ,q^))
-           (membero op '(not))
+           (membero op uop)
            (substo* p^ x t q^))]
    [(fresh (op p1 p2 q1 q2)
            (== p `(,op ,p1 ,p2))
            (== q `(,op ,q1 ,q2))
-           (membero op '(= >= > < <= + - * and or))
+           (membero op bop)
            (substo* p1 x t q1)
            (substo* p2 x t q2))]))
 
