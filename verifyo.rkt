@@ -1,5 +1,3 @@
-
-
 #lang racket
 
 (require rackunit)
@@ -181,7 +179,7 @@
      (== #t #t))
 
 ;; true ⇒ true
-;; To check its validity (it is not), we transform it to true ∧ false
+;; To check its validity, we transform it to true ∧ false
 (run 1 (q)
      (== #t #t)
      (== #t #f))
