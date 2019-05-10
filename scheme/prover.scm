@@ -2,6 +2,7 @@
 ;;(load "evalo-optimized.scm")
 (load "mk/mk.scm")
 (load "arithmetic.scm")
+(load "membero.scm")
 (set! allow-incomplete-search? #t)
 
 ;; TODO: We need it to be pure
@@ -16,7 +17,6 @@
 (define (rewriteo p q)
   (== p q))
 
-;; TODO
 (define (substo* p x t q)
   (conde
    [(== p q) (numbero p)]
@@ -25,7 +25,18 @@
     (== t q)]
    [(symbolo p)
     (=/= p x)
-    (== p q)]))
+    (== p q)]
+   [(fresh (op p^ q^)
+           (== p `(,op ,p^))
+           (== q `(,op ,q^))
+           (membero op '(not))
+           (substo* p^ x t q^))]
+   [(fresh (op p1 p2 q1 q2)
+           (== p `(,op ,p1 ,p2))
+           (== q `(,op ,q1 ,q2))
+           (membero op '(= >= > < <= + - * and or))
+           (substo* p1 x t q1)
+           (substo* p2 x t q2))]))
 
 (define (implieso* p q)
   (conde
