@@ -1,3 +1,6 @@
 [submodule "faster-miniKanren"]
 	path = scheme/mk
 	url = https://github.com/miniKanren/faster-miniKanren.git
+[submodule "icfp2017-artifact-auas7pp"]
+	path = icfp2017-artifact-auas7pp
+	url = https://github.com/gregr/icfp2017-artifact-auas7pp.git
