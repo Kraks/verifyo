@@ -17,6 +17,7 @@
    [(== p q)]))
 
 ;; TODO: why such rewrite rules are adequate?
+;; Such rewriteo is essentially a partial evaluator on logic terms.
 (define (rewriteo p q)
   (conde
    ;; Reflexivity
@@ -170,6 +171,7 @@
    [(== p q)]
    [(== q 'true)]
    [(== p 'false)]
+   ;; TODO: is it sound? under what condition?
    [(fresh (r s w v)
            (== p `(and ,r ,s))
            (== q `(and ,w ,v))
