@@ -1,20 +1,38 @@
-;;(load "mk/test-check.scm")
-;;(load "evalo-optimized.scm")
 (load "mk/mk.scm")
 (load "arithmetic.scm")
 (load "membero.scm")
+(load "mk/test-check.scm")
 (set! allow-incomplete-search? #t)
 
-(define uop '(not))
-(define bop '(= >= > < <= + - * and or))
+#| Grammar:
+com := (skip)                   skip
+     | (x := aexp)              assignment
+     | (if bexp com com)        conditional
+     | (seq com com)            sequence
+     | (while bexp com)         loop
+     | (pre bexp com)           strenthen the pre-condition
+     | (post bexp com)          weaken the post-condition
+
+aexp := ℕ | x
+      | (+ aexp aexp)
+      | (- aexp aexp)
+      | (* aexp aexp)
+
+bexp := true | false
+      | (>= aexp aexp)          greater or equal than
+      | (>  aexp aexp)          greater than
+|#
+
+(define op1 '(not))
+(define op2 '(= >= > < <= + - * and or))
 
 ;; TODO: does it terminate?
 (define (normo p q)
   (conde
+   [(== p q)]
    [(fresh (r)
            (rewriteo p r)
-           (normo r q))]
-   [(== p q)]))
+           (normo r q))]))
 
 ;; TODO: why such rewrite rules are adequate?
 ;; Such rewriteo is essentially a partial evaluator on logic terms.
@@ -27,20 +45,22 @@
    [(fresh (x)
            (== p `(>= ,x ,x))
            (== q 'true))]
+   #|
    [(fresh (x)
            (== p `(<= ,x ,x))
            (== q 'true))]
+   |#
    ;; Congruence of unary operators
    [(fresh (op p^ q^)
            (== p `(,op ,p^))
            (== q `(,op ,q^))
-           (membero op uop)
+           (membero op op1)
            (rewriteo p^ q^))]
    ;; Congruence of binary operators
    [(fresh (op p1 p2 q1 q2)
            (== p `(,op ,p1 ,p2))
            (== q `(,op ,q1 ,q2))
-           (membero op bop)
+           (membero op op2)
            (rewriteo p1 q1)
            (rewriteo p2 q2))]
    ;; Prefer right-associativity over left-associativity
@@ -97,23 +117,31 @@
              (== q (int 0))]
             [(== p `(* ,p^ (int ())))
              (== q (int 0))]))]
+   ;; Prefer greater over geq
+   [(fresh (x n1 n2)
+           (conde
+            [(== p `(>= ,x (int ,n1)))
+             (== q `(>  ,x ,n2))
+             (minuso n1 (build-num 1) n2)]))]
    ;; Simplify conjunctions of comparisons
    ;; TODO: Obviously, there can be more such rules, do we need them?
    ;; TODO: Do we need both >=/> and <=/<?
    ;;       If we enforce that variables must appear on the lhs, then seems yes.
    ;;       But if we relax that (x > 1 or 1 > x are both valid), then we need more rewrite rules to handle the later cases.
    [(fresh (x y)
-           (== p `(and (> ,x ,y) (>= ,x ,y))) ;;TODO: this assumes > appears before >=!
+           (== p `(and (>= ,x ,y) (> ,x ,y)))  ;; Note: this assumes > appears before >=!
            (== q `(> ,x ,y)))]
+   [(fresh (x y)
+           (== p `(and (>= ,x ,y) (not (> ,x ,y))))
+           (== q `(= ,x ,y)))]
+   #|
    [(fresh (x y)
            (== p `(and (< ,x ,y) (<= ,x ,y)))
            (== q `(< ,x ,y)))]
    [(fresh (x y)
-           (== p `(and (>= ,x ,y) (not (> ,x ,y))))
-           (== q `(= ,x ,y)))]
-   [(fresh (x y)
            (== p `(and (<= ,x ,y) (not (< ,x ,y))))
            (== q `(= ,x ,y)))]
+   |#
    ;; Constant folding
    [(fresh (x y)
            (== p `(> (int ,x) (int ,y)))
@@ -142,12 +170,24 @@
            (== q `(,x (int ,n3)))
            (minuso n2 n1 n3))]
    [(fresh (x y)
-           (== p `(>= (- ,x ,y)) ,(int 0))
-           (== q `(>= ,x ,y)))]))
+           (== p `(>= (- ,x ,y) ,(int 0)))
+           (== q `(>= ,x ,y)))]
+   #| -1 is not expressible
+   [(fresh (x y)
+           (== p `(- ,x ,y) (int -1))
+           (== q `(>= ,x ,y)))]
+   |#
+   [(fresh ()
+           (== p `(+ (* (+ ,x ,(int 1)) ,y) (- ,z ,y)))
+           (== q `(+ (* ,x ,y) ,z)))]
+   ))
 
 (define (substo* p x t q)
   (conde
-   [(== p q) (numbero p)]
+   ;;[(== p q) (numbero p)]
+   [(fresh (n)
+           (== p `(int ,n))
+           (== q p))]
    [(symbolo p)
     (== p x)
     (== t q)]
@@ -157,12 +197,12 @@
    [(fresh (op p^ q^)
            (== p `(,op ,p^))
            (== q `(,op ,q^))
-           (membero op uop)
+           (membero op op1)
            (substo* p^ x t q^))]
    [(fresh (op p1 p2 q1 q2)
            (== p `(,op ,p1 ,p2))
            (== q `(,op ,q1 ,q2))
-           (membero op bop)
+           (membero op op2)
            (substo* p1 x t q1)
            (substo* p2 x t q2))]))
 
@@ -247,3 +287,4 @@
            (provero p com^ r))]
    [(== com `(skip))
     (equivo p q)]))
+
