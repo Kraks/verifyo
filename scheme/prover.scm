@@ -16,7 +16,7 @@
            (normo r q))]
    [(== p q)]))
 
-;; TODO
+;; TODO: why such rewrite rules are adequate?
 (define (rewriteo p q)
   (conde
    ;; Reflexivity
@@ -95,7 +95,54 @@
             [(== p `(* (int ()) ,p^))
              (== q (int 0))]
             [(== p `(* ,p^ (int ())))
-             (== q (int 0))]))]))
+             (== q (int 0))]))]
+   ;; Simplify conjunctions of comparisons
+   ;; TODO: Obviously, there can be more such rules, do we need them?
+   ;; TODO: Do we need both >=/> and <=/<?
+   ;;       If we enforce that variables must appear on the lhs, then seems yes.
+   ;;       But if we relax that (x > 1 or 1 > x are both valid), then we need more rewrite rules to handle the later cases.
+   [(fresh (x y)
+           (== p `(and (> ,x ,y) (>= ,x ,y))) ;;TODO: this assumes > appears before >=!
+           (== q `(> ,x ,y)))]
+   [(fresh (x y)
+           (== p `(and (< ,x ,y) (<= ,x ,y)))
+           (== q `(< ,x ,y)))]
+   [(fresh (x y)
+           (== p `(and (>= ,x ,y) (not (> ,x ,y))))
+           (== q `(= ,x ,y)))]
+   [(fresh (x y)
+           (== p `(and (<= ,x ,y) (not (< ,x ,y))))
+           (== q `(= ,x ,y)))]
+   ;; Constant folding
+   [(fresh (x y)
+           (== p `(> (int ,x) (int ,y)))
+           (conde
+            [(<o y x) (== q 'true)]
+            [(<=o x y) (== q 'false)]))]
+   [(fresh (x y)
+           (== p `(>= (int ,x) (int ,y)))
+           (conde
+            [(<=o y x) (== q 'true)]
+            [(< x y) (== q 'false)]))]
+   [(fresh (x n1 n2 n3)
+           (== p `(> (- ,x (int n1)) (int ,n2)))
+           (== q `(> x (int ,n3)))
+           (== n3 (pluso n1 n2)))]
+   [(fresh (x n1 n2)
+           (== p `(and (> ,x (int ,n1) (not (> ,x (int ,n2))))))
+           (== q `(= ,x (int ,n2)))
+           (pluso n1 (build-num 1) n2))]
+   [(fresh (x n1 n2 n3)
+           (== p `(and (> x (int ,n1)) (> ,x (int ,n2))))
+           (== q `(> x (int ,n3)))
+           (maxo n1 n2 n3))]
+   [(fresh (x n1 n2 n3)
+           (== p `(> (+ ,x (int ,n1)) (int ,n2)))
+           (== q `(,x (int ,n3)))
+           (minuso n2 n1 n3))]
+   [(fresh (x y)
+           (== p `(>= (- ,x ,y)) ,(int 0))
+           (== q `(>= ,x ,y)))]))
 
 (define (substo* p x t q)
   (conde

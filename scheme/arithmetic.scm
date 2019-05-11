@@ -21,9 +21,6 @@
          (build-num (quotient n 2))))
       ((zero? n) '()))))
 
-(define int
-  (lambda (x) `(int ,(build-num x))))
-
 (define zeroo
   (lambda (n)
     (== '() n)))
@@ -306,3 +303,13 @@
   (lambda (b q n)
     (logo n b q '())))
 
+;; The following are added by Guannan Wei
+
+(define int
+  (lambda (x) `(int ,(build-num x))))
+
+(define maxo
+  (lambda (x y z)
+    (conde
+      [(<o x y) (== z y)]
+      [(<=o y x) (== z x)])))
