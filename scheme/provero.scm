@@ -19,6 +19,7 @@ aexp := ℕ | x
       | (* aexp aexp)
 
 bexp := true | false
+      | (and bexp bexp)
       | (>= aexp aexp)          greater or equal than
       | (>  aexp aexp)          greater than
 |#
@@ -26,15 +27,16 @@ bexp := true | false
 (define op1 '(not))
 (define op2 '(= >= > < <= + - * and or))
 
-;; TODO: does it terminate?
 (define (normo p q)
   (conde
-   [(== p q)]
    [(fresh (r)
+           (=/= p q)
            (rewriteo p r)
-           (normo r q))]))
+           (normo r q))]
+   [(== p q)]))
 
 ;; TODO: why such rewrite rules are adequate?
+;; TODO: consider divide rewrite to rewrite/pred rewrite/exp?
 ;; Such rewriteo is essentially a partial evaluator on logic terms.
 (define (rewriteo p q)
   (conde
@@ -85,19 +87,19 @@ bexp := true | false
              (== q p^)]))]
    [(fresh (x)
            (conde
-            [(== p `(+ (int ()) ,x))
-             (== q x)]
-            [(== p `(+ ,x (int ())))
-             (== q x)]))]
+            [(== p `(+ (int ()) (int ,x)))
+             (== q `(int ,x))]
+            [(== p `(+ (int ,x) (int ())))
+             (== q `(int ,x))]))]
    [(fresh (x)
-           (== p `(- ,x (int ())))
-           (== q x))]
+           (== p `(- (int ,x) (int ())))
+           (== q `(int ,x)))]
    [(fresh (x)
            (conde
-            [(== p `(* (int (1)) ,x))
-             (== q x)]
-            [(== p `(* ,x (int (1))))
-             (== q x)]))]
+            [(== p `(* (int (1)) (int ,x)))
+             (== q `(int ,x))]
+            [(== p `(* (int ,x) (int (1))))
+             (== q `(int ,x))]))]
    ;; Zero laws
    [(fresh (p^)
            (conde
@@ -113,16 +115,15 @@ bexp := true | false
              (== q 'true)]))]
    [(fresh (p^)
            (conde
-            [(== p `(* (int ()) ,p^))
+            [(== p `(* (int ()) (int ,p^)))
              (== q (int 0))]
-            [(== p `(* ,p^ (int ())))
+            [(== p `(* (int ,p^) (int ())))
              (== q (int 0))]))]
    ;; Prefer greater over geq
    [(fresh (x n1 n2)
-           (conde
-            [(== p `(>= ,x (int ,n1)))
-             (== q `(>  ,x ,n2))
-             (minuso n1 (build-num 1) n2)]))]
+           (== p `(>= (int ,x) (int ,n1)))
+           (== q `(>  (int ,x) (int ,n2)))
+           (minuso n1 (build-num 1) n2))]
    ;; Simplify conjunctions of comparisons
    ;; TODO: Obviously, there can be more such rules, do we need them?
    ;; TODO: Do we need both >=/> and <=/<?
@@ -152,35 +153,34 @@ bexp := true | false
            (== p `(>= (int ,x) (int ,y)))
            (conde
             [(<=o y x) (== q 'true)]
-            [(< x y) (== q 'false)]))]
+            [(<o x y) (== q 'false)]))]
    [(fresh (x n1 n2 n3)
-           (== p `(> (- ,x (int n1)) (int ,n2)))
-           (== q `(> x (int ,n3)))
+           (== p `(> (- (int ,x) (int n1)) (int ,n2)))
+           (== q `(> (int ,x) (int ,n3)))
            (== n3 (pluso n1 n2)))]
    [(fresh (x n1 n2)
-           (== p `(and (> ,x (int ,n1) (not (> ,x (int ,n2))))))
-           (== q `(= ,x (int ,n2)))
+           (== p `(and (> (int ,x) (int ,n1) (not (> (int ,x) (int ,n2))))))
+           (== q `(= (int ,x) (int ,n2)))
            (pluso n1 (build-num 1) n2))]
    [(fresh (x n1 n2 n3)
-           (== p `(and (> x (int ,n1)) (> ,x (int ,n2))))
-           (== q `(> x (int ,n3)))
+           (== p `(and (> (int ,x) (int ,n1)) (> (int ,x) (int ,n2))))
+           (== q `(> (int ,x) (int ,n3)))
            (maxo n1 n2 n3))]
    [(fresh (x n1 n2 n3)
-           (== p `(> (+ ,x (int ,n1)) (int ,n2)))
-           (== q `(,x (int ,n3)))
+           (== p `(> (+ (int ,x) (int ,n1)) (int ,n2)))
+           (== q `(> (int ,x) (int ,n3)))
            (minuso n2 n1 n3))]
    [(fresh (x y)
-           (== p `(>= (- ,x ,y) ,(int 0)))
-           (== q `(>= ,x ,y)))]
+           (== p `(>= (- (int ,x) (int ,y)) ,(int 0)))
+           (== q `(>= (int ,x) (int ,y))))]
    #| -1 is not expressible
    [(fresh (x y)
-           (== p `(- ,x ,y) (int -1))
+           (== p `(> (- ,x ,y) (int -1)))
            (== q `(>= ,x ,y)))]
    |#
-   [(fresh ()
-           (== p `(+ (* (+ ,x ,(int 1)) ,y) (- ,z ,y)))
-           (== q `(+ (* ,x ,y) ,z)))]
-   ))
+   [(fresh (x y z)
+           (== p `(+ (* (+ (int ,x) ,(int 1)) (int ,y)) (- (int ,z) (int ,y))))
+           (== q `(+ (* (int ,x) (int ,y)) (int ,z))))]))
 
 (define (substo* p x t q)
   (conde
