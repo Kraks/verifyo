@@ -10,12 +10,12 @@
       (run 1 (q) (substo* 'x 'y 1 'x))
       '((_.0)))
 
-(test "(and x y)[x ↦ 2] ≡ (and 2 y)"
-      (run 1 (q) (substo* '(and x y) 'x 2 '(and 2 y)))
+(test "(∧ x y)[x ↦ 2] ≡ (∧ 2 y)"
+      (run 1 (q) (substo* '(∧ x y) 'x 2 '(∧ 2 y)))
       '((_.0)))
 
-(test "(and x y)[{?} ↦ 2] ≡ (and 2 y)"
-      (run 1 (q) (substo* '(and x y) q 2 '(and 2 y)))
+(test "(∧ x y)[{?} ↦ 2] ≡ (∧ 2 y)"
+      (run 1 (q) (substo* '(∧ x y) q 2 '(∧ 2 y)))
       '((x)))
 
 (test "(int 3)[y ↦ z] ≡ (int 3)"

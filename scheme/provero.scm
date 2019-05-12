@@ -2,6 +2,7 @@
 (load "arithmetic.scm")
 (load "membero.scm")
 (load "mk/test-check.scm")
+
 (set! allow-incomplete-search? #t)
 
 #| Grammar:
@@ -19,21 +20,21 @@ aexp := ℕ | x
       | (* aexp aexp)
 
 bexp := true | false
-      | (and bexp bexp)
+      | (∧ bexp bexp)
       | (>= aexp aexp)          greater or equal than
       | (>  aexp aexp)          greater than
 |#
 
-(define op1 '(not))
-(define op2 '(= >= > < <= + - * and or))
+(define op1 '(¬))
+(define op2 '(= >= > < <= + - * ∧ ∨))
 
 ;; Reflexive, symmetric, transitive closure of rewriteo
-(define (normo p q)
+(define (⇓o p q)
   (conde
    [(fresh (r)
            (=/= p q)
            (rewriteo p r)
-           (normo r q))]
+           (⇓o r q))]
    [(== p q)]))
 
 ;; TODO: why such rewrite rules are adequate?
@@ -70,23 +71,23 @@ bexp := true | false
            (rewriteo p2 q2))]
    ;; Prefer right-associativity over left-associativity
    [(fresh (p1 p2 p3)
-           (== p `(and (and ,p1 ,p2) ,p3))
-           (== q `(and ,p1 (and ,p2 ,p3))))]
+           (== p `(∧ (∧ ,p1 ,p2) ,p3))
+           (== q `(∧ ,p1 (∧ ,p2 ,p3))))]
    [(fresh (p1 p2 p3)
-           (== p `(or (or ,p1 ,p2) ,p3))
-           (== q `(or ,p1 (or ,p2 ,p3))))]
+           (== p `(∨ (∨ ,p1 ,p2) ,p3))
+           (== q `(∨ ,p1 (∨ ,p2 ,p3))))]
    ;; Unit laws
    [(fresh (p^)
            (conde
-            [(== p `(and true ,p^))
+            [(== p `(∧ true ,p^))
              (== q p^)]
-            [(== p `(and ,p^ true))
+            [(== p `(∧ ,p^ true))
              (== q p^)]))]
    [(fresh (p^)
            (conde
-            [(== p `(or false ,p^))
+            [(== p `(∨ false ,p^))
              (== q p^)]
-            [(== p `(or ,p^ false))
+            [(== p `(∨ ,p^ false))
              (== q p^)]))]
    [(fresh (x)
            (conde
@@ -106,15 +107,15 @@ bexp := true | false
    ;; Zero laws
    [(fresh (p^)
            (conde
-            [(== p `(and false ,p^))
+            [(== p `(∧ false ,p^))
              (== q 'false)]
-            [(== p `(and ,p^ false))
+            [(== p `(∧ ,p^ false))
              (== q 'false)]))]
    [(fresh (p^)
            (conde
-            [(== p `(or true ,p^))
+            [(== p `(∨ true ,p^))
              (== q 'true)]
-            [(== p `(or ,p^ true))
+            [(== p `(∨ ,p^ true))
              (== q 'true)]))]
    [(fresh (p^)
            (conde
@@ -133,20 +134,25 @@ bexp := true | false
    ;;       If we enforce that variables must appear on the lhs, then seems yes.
    ;;       But if we relax that (x > 1 or 1 > x are both valid), then we need more rewrite rules to handle the later cases.
    [(fresh (x y)
-           (== p `(and (>= ,x ,y) (> ,x ,y)))  ;; Note: this assumes > appears before >=!
+           (== p `(∧ (>= ,x ,y) (> ,x ,y)))  ;; Note: this assumes > appears before >=!
            (== q `(> ,x ,y)))]
    [(fresh (x y)
-           (== p `(and (>= ,x ,y) (not (> ,x ,y))))
+           (== p `(∧ (>= ,x ,y) (¬ (> ,x ,y))))
            (== q `(= ,x ,y)))]
    #|
    [(fresh (x y)
-           (== p `(and (< ,x ,y) (<= ,x ,y)))
+           (== p `(∧ (< ,x ,y) (<= ,x ,y)))
            (== q `(< ,x ,y)))]
    [(fresh (x y)
-           (== p `(and (<= ,x ,y) (not (< ,x ,y))))
+           (== p `(∧ (<= ,x ,y) (¬ (< ,x ,y))))
            (== q `(= ,x ,y)))]
    |#
    ;; Constant folding
+   [(fresh (x y)
+           (== p `(= (int ,x) (int ,y)))
+           (conde
+            [(== x y) (== q 'true)]
+            [(=/= x y) (== q 'false)]))]
    [(fresh (x y)
            (== p `(> (int ,x) (int ,y)))
            (conde
@@ -162,11 +168,11 @@ bexp := true | false
            (== q `(> (int ,x) (int ,n3)))
            (== n3 (pluso n1 n2)))]
    [(fresh (x n1 n2)
-           (== p `(and (> (int ,x) (int ,n1) (not (> (int ,x) (int ,n2))))))
+           (== p `(∧ (> (int ,x) (int ,n1) (¬ (> (int ,x) (int ,n2))))))
            (== q `(= (int ,x) (int ,n2)))
            (pluso n1 (build-num 1) n2))]
    [(fresh (x n1 n2 n3)
-           (== p `(and (> (int ,x) (int ,n1)) (> (int ,x) (int ,n2))))
+           (== p `(∧ (> (int ,x) (int ,n1)) (> (int ,x) (int ,n2))))
            (== q `(> (int ,x) (int ,n3)))
            (maxo n1 n2 n3))]
    [(fresh (x n1 n2 n3)
@@ -216,12 +222,12 @@ bexp := true | false
    [(== p 'false)]
    ;; TODO: is it sound? under what condition?
    [(fresh (r s w v)
-           (== p `(and ,r ,s))
-           (== q `(and ,w ,v))
+           (== p `(∧ ,r ,s))
+           (== q `(∧ ,w ,v))
            (implieso* r w)
            (implieso* s v))]
    [(fresh (r s)
-           (== p `(or ,r ,s))
+           (== p `(∨ ,r ,s))
            (conde
             [(implieso r q)]
             [(implieso s q)]))]
@@ -248,15 +254,15 @@ bexp := true | false
 
 (define (implieso p q)
   (fresh (r t)
-         (normo p r)
-         (normo q t)
+         (⇓o p r)
+         (⇓o q t)
          (implieso* r t)))
 
 ;; Equivalent up to normalization
 (define (equivo p q)
   (fresh (r)
-         (normo p r)
-         (normo r q)))
+         (⇓o p r)
+         (⇓o r q)))
 
 ;; p[x -> t] = q
 (define (substo p x t q)
@@ -275,12 +281,12 @@ bexp := true | false
            (provero r c2 q))]
    [(fresh (cnd thn els)
            (== com `(if ,cnd ,thn ,els))
-           (provero `(and ,p ,cnd) thn q)
-           (provero `(and ,p (not ,cnd)) els q))]
+           (provero `(∧ ,p ,cnd) thn q)
+           (provero `(∧ ,p (¬ ,cnd)) els q))]
    [(fresh (cnd body)
            (== com `(while ,cnd ,body))
-           (equivo `(and ,p (not ,cnd)) q)
-           (provero `(and ,p ,cnd) body p))]
+           (equivo `(∧ ,p (¬ ,cnd)) q)
+           (provero `(∧ ,p ,cnd) body p))]
    [(fresh (r com^)
            (== com `(pre ,r ,com^))
            (implieso p r)
