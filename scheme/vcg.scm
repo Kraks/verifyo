@@ -1,9 +1,8 @@
-(load "mk/mk-vicare.scm")
-(load "mk/mk.scm")
-(load "mk/numbers.scm")
 (load "dmatch.scm")
-
 (load "while.scm")
+
+;; A verification condition generator for WHILE, translating to SMT formula.
+;; Author: Guannan Wei
 
 ;; TODO: logical variables
 

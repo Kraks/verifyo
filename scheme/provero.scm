@@ -27,6 +27,7 @@ bexp := true | false
 (define op1 '(not))
 (define op2 '(= >= > < <= + - * and or))
 
+;; Reflexive, symmetric, transitive closure of rewriteo
 (define (normo p q)
   (conde
    [(fresh (r)
@@ -38,6 +39,8 @@ bexp := true | false
 ;; TODO: why such rewrite rules are adequate?
 ;; TODO: consider divide rewrite to rewrite/pred rewrite/exp?
 ;; Such rewriteo is essentially a partial evaluator on logic terms.
+
+;; Single-step rewrite rules
 (define (rewriteo p q)
   (conde
    ;; Reflexivity
@@ -249,6 +252,7 @@ bexp := true | false
          (normo q t)
          (implieso* r t)))
 
+;; Equivalent up to normalization
 (define (equivo p q)
   (fresh (r)
          (normo p r)
