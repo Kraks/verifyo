@@ -1,6 +1,6 @@
 (load "mk/test-check.scm")
 (load "arithmetic.scm")
-(load "prover.scm")
+(load "provero.scm")
 
 (test "x[x ↦ 1] ≡ 1"
       (run 1 (q) (substo* 'x 'x 1 1))

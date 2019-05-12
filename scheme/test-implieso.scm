@@ -1,5 +1,5 @@
 (load "mk/test-check.scm")
-(load "prover.scm")
+(load "provero.scm")
 
 (test "true => true"
       (run 1 (q) (implieso* 'true 'true))
@@ -37,20 +37,50 @@
       (run 1 (q) (implieso* `(> x ,(int 0)) `(> x ,(int 1))))
       '())
 
-(test "q => (> x 1)"
+(test "{q} => (> x 1)"
       (run 1 (q) (implieso* q `(> x ,(int 1))))
       '(((> x (int (1))))))
 
-(test "q => (> x 1), q =/= (> x 1)"
+(test "{q} => (> x 1), {q} =/= (> x 1)"
       (run 1 (q)
            (implieso* q `(> x ,(int 1)))
            (=/= q `(> x ,(int 1))))
       '((false)))
 
-(test "q => (> x 1), q =/= (> x 1), q =/= false"
+(test "{q} => (> x 1), {q} =/= (> x 1), {q} =/= false"
       (run 1 (q)
            (implieso* q `(> x ,(int 1)))
            (=/= q `(> x ,(int 1)))
            (=/= q 'false))
       '(((> x (int (_.0 _.1 . _.2))))))
 
+(test "(> x 1) => {q}, {q} =/= (> x 1), {q} =/= true"
+      (run 1 (q)
+           (implieso* `(> x ,(int 1)) q)
+           (=/= q `(> x ,(int 1)))
+           (=/= q 'true))
+      '(((> x (int ())))))
+
+(test "(> x 2) => {q}, {q} =/= (> x 2), {q} =/= true"
+      (run 1 (q)
+           (implieso* `(> x ,(int 2)) q)
+           (=/= q `(> x ,(int 2)))
+           (=/= q 'true))
+      '(((> x (int ())))))
+
+(test "(> x 2) => {q}, {q} =/= (> x 2), {q} =/= true, {q} =/= (> x 0)"
+      (run 1 (q)
+           (implieso* `(> x ,(int 2)) q)
+           (=/= q `(> x ,(int 2)))
+           (=/= q `(> x ,(int 0)))
+           (=/= q 'true))
+      '(((> x (int (1))))))
+
+(test "(> x 2) => {q}, {q} =/= (> x 2), {q} =/= true, {q} =/= (> x 1), {q} =/= (> x 0)"
+      (run 1 (q)
+           (implieso* `(> x ,(int 2)) q)
+           (=/= q `(> x ,(int 2)))
+           (=/= q `(> x ,(int 1)))
+           (=/= q `(> x ,(int 0)))
+           (=/= q 'true))
+      '())
