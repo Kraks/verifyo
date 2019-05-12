@@ -25,6 +25,11 @@
       (run 1 (q) (rewriteo '(and (and true true) true) '(and true (and true true))))
       '((_.0)))
 
+(test "(> (+ 2 1) 2) ≡ (> 2 1)"
+      (run 1 (q) (rewriteo `(> (+ ,(int 2) ,(int 1)) ,(int 2))
+                           `(> ,(int 2) ,(int 1))))
+      '((_.0)))
+
 ;; compute 100 valid terms
 ;; (run 100 (q) (rewriteo q 'true))
 
