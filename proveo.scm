@@ -178,7 +178,7 @@ bexp := true | false
    [(fresh (x n1 n2 n3)
            (== p `(> (- (int ,x) (int n1)) (int ,n2)))
            (== q `(> (int ,x) (int ,n3)))
-           (== n3 (pluso n1 n2)))]
+           (pluso n1 n2 n3))]
    [(fresh (x n1 n2)
            (== p `(∧ (> (int ,x) (int ,n1) (¬ (> (int ,x) (int ,n2))))))
            (== q `(= (int ,x) (int ,n2)))
@@ -230,7 +230,7 @@ bexp := true | false
 (define (implieso* p q)
   (conde
    [(== p q)]
-   [(== q 'true)]
+   ;[(== q 'true)]
    [(== p 'false)]
    ;; TODO: is it sound? under what condition?
    [(fresh (r s w v)
