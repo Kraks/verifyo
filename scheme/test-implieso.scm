@@ -1,5 +1,5 @@
 (load "mk/test-check.scm")
-(load "provero.scm")
+(load "proveo.scm")
 
 (test "true => true"
       (run 1 (q) (implieso* 'true 'true))

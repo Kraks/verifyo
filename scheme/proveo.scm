@@ -26,7 +26,13 @@ bexp := true | false
 |#
 
 (define op1 '(¬))
-(define op2 '(= >= > < <= + - * ∧ ∨))
+(define op2 `(+ - * = >= > < <= ∧ ∨))
+
+(define arithop '(+ - *))
+(define boolop_num '(= >= > < <=))
+(define boolop_bool '(∧ ∨))
+(define boolop `(,@op1 ,@boolop_bool ,@boolop_bool))
+
 
 ;; Reflexive, symmetric, transitive closure of rewriteo
 (define (⇓o p q)
@@ -259,10 +265,7 @@ bexp := true | false
          (implieso* r t)))
 
 ;; Equivalent up to normalization
-(define (equivo p q)
-  (fresh (r)
-         (⇓o p r)
-         (⇓o r q)))
+(define (equivo p q) (⇓o p q))
 
 ;; p[x -> t] = q
 (define (substo p x t q)
@@ -270,31 +273,77 @@ bexp := true | false
          (substo* p x t r)
          (equivo r q)))
 
-(define (provero p com q)
+(define (listof01o x)
+  (conde
+   [(== x '())]
+   [(fresh (a d)
+           (== `(,a . ,d) x)
+           (membero a '(0 1))
+           (listof01o d))]))
+
+(define (into e)
+  (fresh (x)
+         (== e `(int ,x))
+         (listof01o x)))
+
+(define (aexpo e)
+  (conde
+   [(into e)]
+   [(symbolo e)]
+   [(fresh (op e1 e2)
+           (== e `(,op ,e1 ,e2))
+           (membero op arithop)
+           (aexpo e1)
+           (aexpo e2))]))
+
+(define (bexpo e)
+  (conde
+   [(== e 'true)]
+   [(== e 'false)]
+   [(fresh (op e1)
+           (== e `(,op ,e1))
+           (membero op op1)
+           (bexpo e1))]
+   [(fresh (op e1 e2)
+           (== e `(,op ,e1 ,e2))
+           (membero op boolop_num)
+           (aexpo e1)
+           (aexpo e2))]
+   [(fresh (op e1 e2)
+           (== e `(,op ,e1 ,e2))
+           (membero op boolop_bool)
+           (bexpo e1)
+           (bexpo e2))]))
+
+(define (varo x) (symbolo x))
+
+(define (proveo p com q)
+  ;; TODO: bexpo p and q
   (conde
    [(fresh (x e)
            (== com `(,x := ,e))
+           (varo x)
+           (aexpo e)
            (substo q x e p))]
    [(fresh (c1 r c2)
            (== com `(seq ,c1 ,c2))
-           (provero p c1 r)
-           (provero r c2 q))]
+           (proveo p c1 r)
+           (proveo r c2 q))]
    [(fresh (cnd thn els)
            (== com `(if ,cnd ,thn ,els))
-           (provero `(∧ ,p ,cnd) thn q)
-           (provero `(∧ ,p (¬ ,cnd)) els q))]
+           (proveo `(∧ ,p ,cnd) thn q)
+           (proveo `(∧ ,p (¬ ,cnd)) els q))]
    [(fresh (cnd body)
            (== com `(while ,cnd ,body))
            (equivo `(∧ ,p (¬ ,cnd)) q)
-           (provero `(∧ ,p ,cnd) body p))]
+           (proveo `(∧ ,p ,cnd) body p))]
    [(fresh (r com^)
            (== com `(pre ,r ,com^))
            (implieso p r)
-           (provero r com^ Q))]
+           (proveo r com^ Q))]
    [(fresh (r com^)
            (== com `(post ,r ,com^))
            (implieso r q)
-           (provero p com^ r))]
+           (proveo p com^ r))]
    [(== com `(skip))
     (equivo p q)]))
-
