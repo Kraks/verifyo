@@ -153,6 +153,12 @@ bexp := true | false
            (== p `(∧ (<= ,x ,y) (¬ (< ,x ,y))))
            (== q `(= ,x ,y)))]
    |#
+   ;; Simplification
+   [(fresh (x n m k)
+           (== p `(= (+ ,x (int ,n)) (int ,m)))
+           (== q `(= ,x (int ,k)))
+           (symbolo x)
+           (minuso m n k))]
    ;; Constant folding
    [(fresh (x y)
            (== p `(= (int ,x) (int ,y)))
@@ -344,7 +350,7 @@ bexp := true | false
           [(fresh (r com^)
                   (== com `(pre ,r ,com^))
                   (implieso p r)
-                  (proveo r com^ Q))]
+                  (proveo r com^ q))]
           [(fresh (r com^)
                   (== com `(post ,r ,com^))
                   (implieso r q)
