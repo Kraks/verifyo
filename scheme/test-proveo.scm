@@ -6,4 +6,4 @@
 
 (test "[true] {q} [true]"
       (run 1 (q) (proveo 'true q 'true))
-      '(()))
+      '(((skip))))

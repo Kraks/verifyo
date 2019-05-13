@@ -318,32 +318,34 @@ bexp := true | false
 (define (varo x) (symbolo x))
 
 (define (proveo p com q)
-  ;; TODO: bexpo p and q
-  (conde
-   [(fresh (x e)
-           (== com `(,x := ,e))
-           (varo x)
-           (aexpo e)
-           (substo q x e p))]
-   [(fresh (c1 r c2)
-           (== com `(seq ,c1 ,c2))
-           (proveo p c1 r)
-           (proveo r c2 q))]
-   [(fresh (cnd thn els)
-           (== com `(if ,cnd ,thn ,els))
-           (proveo `(∧ ,p ,cnd) thn q)
-           (proveo `(∧ ,p (¬ ,cnd)) els q))]
-   [(fresh (cnd body)
-           (== com `(while ,cnd ,body))
-           (equivo `(∧ ,p (¬ ,cnd)) q)
-           (proveo `(∧ ,p ,cnd) body p))]
-   [(fresh (r com^)
-           (== com `(pre ,r ,com^))
-           (implieso p r)
-           (proveo r com^ Q))]
-   [(fresh (r com^)
-           (== com `(post ,r ,com^))
-           (implieso r q)
-           (proveo p com^ r))]
-   [(== com `(skip))
-    (equivo p q)]))
+  (fresh ()
+         (bexpo p)
+         (bexpo q)
+         (conde
+          [(== com `(skip))
+           (equivo p q)]
+          [(fresh (x e)
+                  (== com `(,x := ,e))
+                  (varo x)
+                  (aexpo e)
+                  (substo q x e p))]
+          [(fresh (cnd thn els)
+                  (== com `(if ,cnd ,thn ,els))
+                  (proveo `(∧ ,p ,cnd) thn q)
+                  (proveo `(∧ ,p (¬ ,cnd)) els q))]
+          [(fresh (cnd body)
+                  (== com `(while ,cnd ,body))
+                  (equivo `(∧ ,p (¬ ,cnd)) q)
+                  (proveo `(∧ ,p ,cnd) body p))]
+          [(fresh (c1 r c2)
+                  (== com `(seq ,c1 ,c2))
+                  (proveo p c1 r)
+                  (proveo r c2 q))]
+          [(fresh (r com^)
+                  (== com `(pre ,r ,com^))
+                  (implieso p r)
+                  (proveo r com^ Q))]
+          [(fresh (r com^)
+                  (== com `(post ,r ,com^))
+                  (implieso r q)
+                  (proveo p com^ r))])))
