@@ -49,6 +49,7 @@ A literal is either a symbol, or a negation of a symbol (¬ x).
    [(symbolo p)
     (== q `(¬ ,p))]))
 
+;; the model does not contain duplicates, or conflicted assignments.
 (define (consistento m)
   (conde
    [(== m '())]
@@ -59,12 +60,14 @@ A literal is either a symbol, or a negation of a symbol (¬ x).
            (∉  a d)
            (consistento d))]))
 
+;; variable x is undefined in model m.
 (define (↑ m x)
   (fresh (nx)
          (nego x nx)
          (∉ nx m)
          (∉ x m)))
 
+;; variable x is defined in model m.
 (define (↓ m x)
   (conde
    [(∈ x m)]
@@ -153,6 +156,7 @@ A literal is either a symbol, or a negation of a symbol (¬ x).
 
 (define (⊆ xs ys) ((⊆* (lambda (a m) (↓ m a))) xs ys))
 
+;; should be the final state: all the variables are assigned.
 (define (finalo m f)
   (fresh (vars vars^ c cs)
          (flatteno f vars^)
@@ -160,10 +164,9 @@ A literal is either a symbol, or a negation of a symbol (¬ x).
          (⊆ m vars)
          (⊆ vars m)))
 
-;; d is an auxiliary list that tracks decision literals (only added by Decide rule)
-;; m is the model, i.e., the assignment
-;; f is the formula
-;; r is the result
+;; d is an auxiliary list that tracks decision literals (only added by Decide rule).
+;; m is the model, i.e., the assignment.
+;; ⟨d, m⟩ ↦ ⟨d^, m^⟩
 (define (stepo d m f d^ m^)
   (conde
    ;; Unit Propagate
@@ -197,6 +200,7 @@ A literal is either a symbol, or a negation of a symbol (¬ x).
            (== m^ `(,ndl ,m2))
            (== d^ d))]))
 
+;; TODO: failed to disprove something
 (define (dpllo d m f d^ m^)
   (fresh (d* m* x c)
          (formulao f)
@@ -206,20 +210,9 @@ A literal is either a symbol, or a negation of a symbol (¬ x).
          (conde
           [(== m* 'fail) (== m^ 'fail)]
           [(finalo m* f)
-           (f/⊨ m^ f)
+           (f/⊨ m^ f) ;;TODO: necessary?
            (consistento m*)
            (== m* m^)]
           [(=/= m* 'fail)
            (↑ m* x) (∈ x c) (∈ c f)
            (dpllo d* m* f d^ m^)])))
-
-         #|
-         (conde
-         [(f/⊭ m^ f) ;; TODO
-         (== m^ 'fail)]
-         [(finalo m^ f)
-         (f/⊨ m^ f) ;; TODO
-         (consistento m^)]
-         [(stepo d m f d* m*)
-         (dpllo d* m* f d^ m^)])))
-         |#
