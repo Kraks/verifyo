@@ -12,3 +12,6 @@
            (== xs `(,a . ,d))
            (=/= a x)
            (not-membero x d))]))
+
+(define (∈ x m) (membero x m))
+(define (∉ x m) (not-membero x m))
