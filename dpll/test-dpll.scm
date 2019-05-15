@@ -95,6 +95,62 @@
 
 ;======================================================
 
+(test "(splito '(a b c) '() 'a '(b c)"
+      (run 1 (q) (splito '(a b c) '() 'a '(b c)))
+      '((_.0)))
+
+(test "(splito '(a b c) '(a) 'b '(c)"
+      (run 1 (q) (splito '(a b c) '(a) 'b '(c)))
+      '((_.0)))
+
+(test "(splito '(a b c d e) '(a b c d) 'e '()"
+      (run 1 (q) (splito '(a b c d e) '(a b c d) 'e '()))
+      '((_.0)))
+
+(test "(splito '(a b c d e) '(a b c d) 'e '()"
+      (run 1 (q) (splito '(a b c d e) '(a b c d) 'g q))
+      '())
+
+;======================================================
+
+(test "(rem-dupo '(a b c a) '(b c a))"
+      (run 1 (q) (rem-dupo '(a b c a) '(b c a)))
+      '((_.0)))
+
+(test "(rem-dupo '(a b c b a) '(c b a))"
+      (run 1 (q) (rem-dupo '(a b c b a) '(c b a)))
+      '((_.0)))
+
+(test "(rem-dupo '() '())"
+      (run 1 (q) (rem-dupo '() '()))
+      '((_.0)))
+
+(test "(rem-dupo '(a a a) '(a))"
+      (run 1 (q) (rem-dupo '(a a a) '(a)))
+      '((_.0)))
+
+(test "(flatteno '((a b c) (d e f)) '(a b c d e f))"
+      (run 1 (q) (flatteno '((a b c) (d e f)) '(a b c d e f)))
+      '((_.0)))
+
+(test "(flatteno '((a b c) ()) '(a b c))"
+      (run 1 (q) (flatteno '((a b c) ()) '(a b c)))
+      '((_.0)))
+
+(test "(flatteno '(((¬ a) b c) ((¬ d))) '((¬ a) b c (¬ d)))"
+      (run 1 (q) (flatteno '(((¬ a) b c) ((¬ d))) '((¬ a) b c (¬ d))))
+      '((_.0)))
+
+(test "(⊆ '(a b c) '(c b a))"
+      (run 1 (q) (⊆ '(a b c) '(c b a)))
+      '((_.0)))
+
+(test "(⊆ '(a b c) '(c b))"
+      (run 1 (q) (⊆ '(a b c) '(c b)))
+      '())
+
+;======================================================
+
 (test "(a b) ⊨ (a b)"
       (run 1 (q) (c/⊨ '(a b) '(a b)))
       '((_.0)))
@@ -154,3 +210,43 @@
 (test "((¬ a)) ⊭ ((a) (b))"
       (run 1 (q) (f/⊭ '((¬ a)) '((a) (b))))
       '((_.0)))
+
+;======================================================
+
+(test "(finalo '(a b c) '((a) (b) (c a) (b c)))"
+      (run 1 (q) (finalo '(a b c) '((a) (b) (c a) (b c))))
+      '((_.0)))
+
+(test "(finalo '((¬ a) (¬ b) c) '((a) (b) (c a) (b c)))"
+      (run 1 (q) (finalo '((¬ a) (¬ b) c) '((a) (b) (c a) (b c))))
+      '((_.0)))
+
+(test "solve '((a b))"
+      (run 1 (d m) (dpllo '() '() '((a b)) d m))
+      '(((_.0 (a b)))))
+
+(test "solve '((a b) ((¬ b)))"
+      (run 1 (d m) (dpllo '() '() '((a b) ((¬ b))) d m))
+      '(((_.0 (a (¬ b))))))
+
+#|
+(test "disprove '((a b) ((¬ a)) ((¬ b)))"
+      (run 1 (d m) (dpllo '() '() '((a b) ((¬ a)) ((¬ b))) d m))
+      '())
+|#
+
+(define f1
+  '((a b c) (d e f) (g h i)
+    ((¬ a) (¬ c))
+    (b)
+    ((¬ d))
+    ((¬ f))
+    (e)
+    (g)
+    (h)
+    ((¬ i))))
+
+;(time (run 1 (d m) (dpllo '() '() f1 d m)))
+;(time (run 1 (m) (f/⊨ m f1)))
+
+

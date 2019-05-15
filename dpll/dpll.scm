@@ -58,13 +58,19 @@ A literal is either a symbol, or a negation of a symbol (¬ x).
            (== m `(,a . ,d))
            (nego a na)
            (∉ na d)
+           (∉  a d)
            (consistento d))]))
 
 (define (↑ m x)
   (fresh (nx)
          (nego x nx)
-         (∉ nx n)
+         (∉ nx m)
          (∉ x m)))
+
+(define (↓ m x)
+  (conde
+   [(∈ x m)]
+   [(fresh (nx) (nego x nx) (∈ nx m))]))
 
 (define (c/⊨ m c)
   (fresh (r)
@@ -97,36 +103,112 @@ A literal is either a symbol, or a negation of a symbol (¬ x).
           [(c/⊭ m a)]
           [(f/⊭ m d)])))
 
+(define (splito pxq p x q)
+  (conde
+   [(== pxq '())
+    (== #t #f)]
+   [(fresh (a d p^)
+           (== pxq `(,a . ,d))
+           (conde
+            [(== a x)
+             (== p '())
+             (== q d)]
+            [(=/= a x)
+             (splito d p^ x q)
+             (== p `(,a . ,p^))]))]))
+
+(define (rem-dupo xs ys)
+  (conde
+   [(== xs '()) (== ys '())]
+   [(fresh (a d ys^)
+           (== xs `(,a . ,d))
+           (conde
+            [(∈ a d) (rem-dupo d ys)]
+            [(∉ a d)
+             (rem-dupo d ys^)
+             (== ys `(,a . ,ys^))]))]))
+
+(define (appendo l s out)
+  (conde
+   [(== '() l) (== s out)]
+   [(fresh (a d res)
+           (== `(,a . ,d) l)
+           (== `(,a . ,res) out)
+           (appendo d s res))]))
+
+(define (flatteno xss xs)
+  (conde
+   [(== xss '()) (== xs '())]
+   [(fresh (a d res)
+           (== xss `(,a . ,d))
+           (flatteno d res)
+           (appendo a res xs))]))
+
+(define (⊆* ∈)
+  (lambda (xs ys)
+    (conde
+     [(== xs '())]
+     [(fresh (a d)
+             (== xs `(,a . ,d))
+             (∈ a ys)
+             ((⊆* ∈) d ys))])))
+
+(define (⊆ xs ys) ((⊆* (lambda (a m) (↓ m a))) xs ys))
+
+(define (finalo m f)
+  (fresh (vars vars^ c cs)
+         (flatteno f vars^)
+         (rem-dupo vars^ vars)
+         (⊆ m vars)
+         (⊆ vars m)))
+
+;; d is an auxiliary list that tracks decision literals (only added by Decide rule)
 ;; m is the model, i.e., the assignment
 ;; f is the formula
-;; d is an auxiliary list that tracks decision literals (only added by Decide rule)
 ;; r is the result
-(define (dpllo m f d r)
+(define (stepo d m f d^ m^)
   (conde
-   ;; Succeed
-   ;;[(f/⊨ m f) (== r #t)]
    ;; Unit Propagate
-   [(fresh (x xs c m^)
+   [(fresh (x xs c)
            (∈ c f)
            (== c `(,x . ,xs))
            (c/⊭ m xs)
            (↑ m x)
            (== m^ `(,x . ,m))
-           (dpllo m^ f d r))]
+           (== d^ d))]
    ;; Decide
-   [(fresh (x nx c m^ d^)
+   [(fresh (x nx c)
            (∈ c f)
            (∈ x c)
            (↑ m x)
            (== d^ `(,x . ,d))
-           (== m^ `(,x . ,m))
-           (dpllo m^ f d^ r))]
+           (== m^ `(,x . ,m)))]
    ;; Fail
    [(fresh (c)
            (∈ c f)
            (c/⊭ m c)
            (== d '())
-           (== r #f))]
+           (== m^ 'fail)
+           (== d^ d))]
    ;; Backjump
-   ;; partition
-   ))
+   [(fresh (dl ds ndl m1 m2)
+           (== d `(,dl . ,ds))
+           (splito m m1 dl m2)
+           (nego dl ndl)
+           (↑ m2 ndl)
+           (== m^ `(,ndl ,m2))
+           (== d^ d))]))
+
+(define (dpllo d m f d^ m^)
+  (fresh (d* m*)
+         (formulao f)
+         (consistento m)
+         (consistento m*)
+         (conde
+          [(f/⊭ m^ f)
+           (== m^ 'fail)]
+          [(finalo m^ f)
+           (f/⊨ m^ f)
+           (consistento m^)]
+          [(stepo d m f d* m*)
+           (dpllo d* m* f d^ m^)])))
