@@ -223,17 +223,15 @@
 
 (test "solve '((a b))"
       (run 1 (d m) (dpllo '() '() '((a b)) d m))
-      '(((_.0 (a b)))))
+      '(((_.0 (b a)))))
 
 (test "solve '((a b) ((¬ b)))"
       (run 1 (d m) (dpllo '() '() '((a b) ((¬ b))) d m))
-      '(((_.0 (a (¬ b))))))
+      '(((_.0 ((¬ b) a)))))
 
-#|
 (test "disprove '((a b) ((¬ a)) ((¬ b)))"
       (run 1 (d m) (dpllo '() '() '((a b) ((¬ a)) ((¬ b))) d m))
       '())
-|#
 
 (define f1
   '((a b c) (d e f) (g h i)

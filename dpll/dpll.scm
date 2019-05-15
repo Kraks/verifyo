@@ -49,8 +49,6 @@ A literal is either a symbol, or a negation of a symbol (¬ x).
    [(symbolo p)
     (== q `(¬ ,p))]))
 
-;; TODO: where to add syntactic constraint?
-
 (define (consistento m)
   (conde
    [(== m '())]
@@ -185,10 +183,10 @@ A literal is either a symbol, or a negation of a symbol (¬ x).
            (== m^ `(,x . ,m)))]
    ;; Fail
    [(fresh (c)
+           (== m^ 'fail)
            (∈ c f)
            (c/⊭ m c)
            (== d '())
-           (== m^ 'fail)
            (== d^ d))]
    ;; Backjump
    [(fresh (dl ds ndl m1 m2)
@@ -200,15 +198,28 @@ A literal is either a symbol, or a negation of a symbol (¬ x).
            (== d^ d))]))
 
 (define (dpllo d m f d^ m^)
-  (fresh (d* m*)
+  (fresh (d* m* x c)
          (formulao f)
          (consistento m)
          (consistento m*)
+         (stepo d m f d* m*)
          (conde
-          [(f/⊭ m^ f)
-           (== m^ 'fail)]
-          [(finalo m^ f)
+          [(== m* 'fail) (== m^ 'fail)]
+          [(finalo m* f)
            (f/⊨ m^ f)
-           (consistento m^)]
-          [(stepo d m f d* m*)
+           (consistento m*)
+           (== m* m^)]
+          [(=/= m* 'fail)
+           (↑ m* x) (∈ x c) (∈ c f)
            (dpllo d* m* f d^ m^)])))
+
+         #|
+         (conde
+         [(f/⊭ m^ f) ;; TODO
+         (== m^ 'fail)]
+         [(finalo m^ f)
+         (f/⊨ m^ f) ;; TODO
+         (consistento m^)]
+         [(stepo d m f d* m*)
+         (dpllo d* m* f d^ m^)])))
+         |#
