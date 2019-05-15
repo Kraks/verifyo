@@ -16,18 +16,16 @@ A literal is either a symbol, or a negation of a symbol (¬ x).
            (forall d rel))]))
 
 (define-syntax ∀
-  (syntax-rules (<- ∃)
-    ((_ (x <- xs) (∃ (y <- ys) rel ...))
-     (forall xs (lambda (x) (fresh (y) (∈ y ys) rel ...))))
-    ((_ (x <- xs) (∃ y ...) rel ...)
-     (forall xs (lambda (x) (fresh (y ...) rel ...))))
-    ((_ (x <- xs) rel ...)
+  (syntax-rules (←)
+    ((_ (x ← xs) rel ...)
      (forall xs (lambda (x) rel ...)))))
 
 (define-syntax ∃
-  (syntax-rules (<-)
-    ((_ (x <- xs) rel ...)
-     (fresh (x) (∈ x xs) rel ...))))
+  (syntax-rules (←)
+    ((_ (x ← xs) rel ...)
+     (fresh (x) (∈ x xs) rel ...))
+    ((_ (x ...) rel ...)
+     (fresh (x ...) rel ...))))
 
 (define (lito l)
   (conde
@@ -88,16 +86,16 @@ A literal is either a symbol, or a negation of a symbol (¬ x).
    [(fresh (nx) (nego x nx) (∈ nx m))]))
 
 (define (c/⊨ m c)
-  (∃ (x <- c) (∈ x m)))
+  (∃ (x ← c) (∈ x m)))
 
 (define (c/⊭ m c)
-  (∀ (x <- c) (∃ (nx <- m) (nego x nx))))
+  (∀ (x ← c) (∃ (nx ← m) (nego x nx))))
 
 (define (f/⊨ m f)
-  (∀ (c <- f) (c/⊨ m c)))
+  (∀ (c ← f) (c/⊨ m c)))
 
 (define (f/⊭ m f)
-  (∃ (c <- f) (c/⊭ m c)))
+  (∃ (c ← f) (c/⊭ m c)))
 
 (define (splito pxq p x q)
   (conde
