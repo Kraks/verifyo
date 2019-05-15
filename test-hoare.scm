@@ -1,4 +1,4 @@
-(load "proveo.scm")
+(load "hoare.scm")
 
 (test "[true] (skip) [true]"
       (run 1 (q) (proveo 'true '(skip) 'true))

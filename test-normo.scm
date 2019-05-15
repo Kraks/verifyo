@@ -1,5 +1,5 @@
 (load "mk/test-check.scm")
-(load "proveo.scm")
+(load "hoare.scm")
 
 (test "x = x ≡ true"
       (run 1 (q) (rewriteo '(= x x) 'true))

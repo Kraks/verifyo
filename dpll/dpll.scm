@@ -28,6 +28,8 @@ A literal is either a symbol, or a negation of a symbol (¬ x).
 
 (define (formulao f) ((listofo clauseo) f))
 
+(define (assignmento m) ((listofo lito) m))
+
 (define (intersecto x y z)
   (conde
    [(== x '()) (== z '())]
@@ -73,11 +75,16 @@ A literal is either a symbol, or a negation of a symbol (¬ x).
    [(∈ x m)]
    [(fresh (nx) (nego x nx) (∈ nx m))]))
 
+#|
 (define (c/⊨ m c)
   (fresh (r)
          ((listofo lito) m)
          (intersecto m c r)
          (=/= r '())))
+|#
+
+(define (c/⊨ m c)
+  (fresh (x) (∈ x c) (∈ x m)))
 
 (define (c/⊭ m c)
   (conde
@@ -207,6 +214,7 @@ A literal is either a symbol, or a negation of a symbol (¬ x).
 (define (dpllo d m f d^ m^)
   (fresh (d* m* x c)
          (formulao f)
+         (assignmento m)
          (consistento m)
          (consistento m*)
          (stepo d m f d* m*)
