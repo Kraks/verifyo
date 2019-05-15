@@ -128,4 +128,5 @@ A literal is either a symbol, or a negation of a symbol (¬ x).
            (== d '())
            (== r #f))]
    ;; Backjump
+   ;; partition
    ))
