@@ -229,9 +229,14 @@
       (run 1 (d m) (dpllo '() '() '((a b) ((¬ b))) d m))
       '(((_.0 ((¬ b) a)))))
 
-(test "disprove '((a b) ((¬ a)) ((¬ b)))"
-      (run 1 (d m) (dpllo '() '() '((a b) ((¬ a)) ((¬ b))) d m))
+
+(test "disprove '((a) ((¬ a)))"
+      (run 1 (d m) (dpllo '() '() '((a) ((¬ a))) d 'fail))
       '())
+
+;(test "disprove '((a b) ((¬ a)) ((¬ b)))"
+;      (run 1 (d m) (dpllo '() '() '((a b) ((¬ a)) ((¬ b))) d 'fail))
+;      '())
 
 (define f1
   '((a b c) (d e f) (g h i)

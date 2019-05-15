@@ -167,6 +167,7 @@ A literal is either a symbol, or a negation of a symbol (¬ x).
 ;; d is an auxiliary list that tracks decision literals (only added by Decide rule).
 ;; m is the model, i.e., the assignment.
 ;; ⟨d, m⟩ ↦ ⟨d^, m^⟩
+;; TODO: make the step relation deterministic
 (define (stepo d m f d^ m^)
   (conde
    ;; Unit Propagate
@@ -179,6 +180,7 @@ A literal is either a symbol, or a negation of a symbol (¬ x).
            (== d^ d))]
    ;; Decide
    [(fresh (x nx c)
+           ;; TODO: when do not have unit variable
            (∈ c f)
            (∈ x c)
            (↑ m x)
@@ -193,6 +195,7 @@ A literal is either a symbol, or a negation of a symbol (¬ x).
            (== d^ d))]
    ;; Backjump
    [(fresh (dl ds ndl m1 m2)
+           ;; TODO: when reach a conflict
            (== d `(,dl . ,ds))
            (splito m m1 dl m2)
            (nego dl ndl)
