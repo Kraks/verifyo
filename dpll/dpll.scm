@@ -7,6 +7,21 @@ A clauses is a disjunction of literals, i.e., a list of literals.
 A literal is either a symbol, or a negation of a symbol (¬ x).
 |#
 
+(define (forall xs rel)
+  (conde
+   [(== xs '())]
+   [(fresh (a d)
+           (== xs `(,a . ,d))
+           (rel a)
+           (forall d rel))]))
+
+(define-syntax ∀
+  (syntax-rules (<- ∃)
+    ((_ (x <- xs) (∃ v ...) rel ...)
+     (forall xs (lambda (x) (fresh (v ...) rel ...))))
+    ((_ (x <- xs) rel ...)
+     (forall xs (lambda (x) rel ...)))))
+
 (define (lito l)
   (conde
    [(symbolo l)]
@@ -14,21 +29,11 @@ A literal is either a symbol, or a negation of a symbol (¬ x).
            (== l `(¬ ,l^))
            (symbolo l^))]))
 
-(define listofo
-  (lambda (rel)
-    (lambda (xs)
-      (conde
-       [(== xs '())]
-       [(fresh (a d)
-               (== `(,a . ,d) xs)
-               (rel a)
-               ((listofo rel) d))]))))
+(define (clauseo c) (forall c lito))
 
-(define (clauseo c) ((listofo lito) c))
+(define (formulao f) (forall f clauseo))
 
-(define (formulao f) ((listofo clauseo) f))
-
-(define (assignmento m) ((listofo lito) m))
+(define (assignmento m) (forall m lito))
 
 (define (intersecto x y z)
   (conde
@@ -74,29 +79,6 @@ A literal is either a symbol, or a negation of a symbol (¬ x).
   (conde
    [(∈ x m)]
    [(fresh (nx) (nego x nx) (∈ nx m))]))
-
-#|
-(define (c/⊨ m c)
-  (fresh (r)
-         ((listofo lito) m)
-         (intersecto m c r)
-         (=/= r '())))
-|#
-
-(define (forall xs rel)
-  (conde
-   [(== xs '())]
-   [(fresh (a d)
-           (== xs `(,a . ,d))
-           (rel a)
-           (forall d rel))]))
-
-(define-syntax ∀
-  (syntax-rules (<- ∃)
-    ((_ (x <- xs) (∃ v ...) rel ...)
-     (forall xs (lambda (x) (fresh (v ...) rel ...))))
-    ((_ (x <- xs) rel ...)
-     (forall xs (lambda (x) rel ...)))))
 
 (define (c/⊨ m c)
   (fresh (x) (∈ x c) (∈ x m)))
