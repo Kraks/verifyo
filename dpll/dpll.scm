@@ -83,33 +83,32 @@ A literal is either a symbol, or a negation of a symbol (¬ x).
          (=/= r '())))
 |#
 
+(define (forall xs rel)
+  (conde
+   [(== xs '())]
+   [(fresh (a d)
+           (== xs `(,a . ,d))
+           (rel a)
+           (forall d rel))]))
+
+(define-syntax ∀
+  (syntax-rules (<- ∃)
+    ((_ (x <- xs) (∃ v ...) rel ...)
+     (forall xs (lambda (x) (fresh (v ...) rel ...))))
+    ((_ (x <- xs) rel ...)
+     (forall xs (lambda (x) rel ...)))))
+
 (define (c/⊨ m c)
   (fresh (x) (∈ x c) (∈ x m)))
 
 (define (c/⊭ m c)
-  (conde
-   [(== c '())]
-   [(fresh (a d na)
-           (== c `(,a . ,d))
-           (nego a na)
-           (∈ na m)
-           (c/⊭ m d))]))
+  (∀ (x <- c) (∃ nx) (nego x nx) (∈ nx m)))
 
 (define (f/⊨ m f)
-  (conde
-   [(== f '())]
-   [(fresh (a d)
-           (== f `(,a . ,d))
-           (c/⊨ m a)
-           (f/⊨ m d))]))
+  (∀ (c <- f) (c/⊨ m c)))
 
 (define (f/⊭ m f)
-  (fresh (a d)
-         (=/= f '())
-         (== f `(,a . ,d))
-         (conde
-          [(c/⊭ m a)]
-          [(f/⊭ m d)])))
+  (fresh (c) (∈ c f) (c/⊭ m c)))
 
 (define (splito pxq p x q)
   (conde
