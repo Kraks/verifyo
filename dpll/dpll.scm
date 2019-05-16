@@ -29,32 +29,32 @@ A literal is either a symbol, or a negation of a symbol (¬ x).
     ((_ (x ...) rel ...)
      (fresh (x ...) rel ...))))
 
-(define (lito l)
+(define (litᵒ l)
   (conde
    [(symbolo l)]
    [(fresh (l^)
            (== l `(¬ ,l^))
            (symbolo l^))]))
 
-(define (clauseo c) (forall c lito))
+(define (clauseᵒ c) (forall c litᵒ))
 
-(define (formulao f) (forall f clauseo))
+(define (formulaᵒ f) (forall f clauseᵒ))
 
-(define (assignmento m) (forall m lito))
+(define (assignmentᵒ m) (forall m litᵒ))
 
-(define (intersecto x y z)
+(define (∩ x y z)
   (conde
    [(== x '()) (== z '())]
    [(fresh (a d z^)
            (== `(,a . ,d) x)
            (conde
             [(∈ a y)
-             (intersecto d y z^)
+             (∩ d y z^)
              (== z `(,a . ,z^))]
             [(∉ a y)
-             (intersecto d y z)]))]))
+             (∩ d y z)]))]))
 
-(define (nego p q)
+(define (negᵒ p q)
   (conde
    [(fresh (p^)
            (== p `(¬ ,p^))
@@ -64,31 +64,31 @@ A literal is either a symbol, or a negation of a symbol (¬ x).
     (== q `(¬ ,p))]))
 
 ;; the model does not contain duplicates, or conflicted assignments.
-(define (consistento m)
+(define (consistentᵒ m)
   (conde
    [(== m '())]
    [(fresh (a d na)
            (== m `(,a . ,d))
-           (nego a na)
+           (negᵒ a na)
            (∉ na d)
            (∉  a d)
-           (consistento d))]))
+           (consistentᵒ d))]))
 
 ;; variable x is undefined in model m.
 (define (↑ m x)
-  (∃ (¬x = (nego x)) (∉ ¬x m) (∉ x m)))
+  (∃ (¬x = (negᵒ x)) (∉ ¬x m) (∉ x m)))
 
 ;; variable x is defined in model m.
 (define (↓ m x)
   (conde
    [(∈ x m)]
-   [(∃ (¬x ← m) (nego x ¬x))]))
+   [(∃ (¬x ← m) (negᵒ x ¬x))]))
 
 (define (c/⊨ m c)
   (∃ (x ← c) (∈ x m)))
 
 (define (c/⊭ m c)
-  (∀ (x ← c) (∃ (¬x ← m) (nego x ¬x))))
+  (∀ (x ← c) (∃ (¬x ← m) (negᵒ x ¬x))))
 
 (define (f/⊨ m f)
   (∀ (c ← f) (c/⊨ m c)))
@@ -96,7 +96,8 @@ A literal is either a symbol, or a negation of a symbol (¬ x).
 (define (f/⊭ m f)
   (∃ (c ← f) (c/⊭ m c)))
 
-(define (splito pxq p x q)
+;; Split list pxq at the the first occorence of x.
+(define (splitᵒ pxq p x q)
   (fresh (a d p^)
          (== pxq `(,a . ,d))
          (conde
@@ -104,35 +105,35 @@ A literal is either a symbol, or a negation of a symbol (¬ x).
            (== p '())
            (== q d)]
           [(=/= a x)
-           (splito d p^ x q)
+           (splitᵒ d p^ x q)
            (== p `(,a . ,p^))])))
 
-(define (rem-dupo xs ys)
+(define (rem-dupᵒ xs ys)
   (conde
    [(== xs '()) (== ys '())]
    [(fresh (a d ys^)
            (== xs `(,a . ,d))
            (conde
-            [(∈ a d) (rem-dupo d ys)]
+            [(∈ a d) (rem-dupᵒ d ys)]
             [(∉ a d)
-             (rem-dupo d ys^)
+             (rem-dupᵒ d ys^)
              (== ys `(,a . ,ys^))]))]))
 
-(define (appendo l s out)
+(define (appendᵒ l s out)
   (conde
    [(== '() l) (== s out)]
    [(fresh (a d res)
            (== `(,a . ,d) l)
            (== `(,a . ,res) out)
-           (appendo d s res))]))
+           (appendᵒ d s res))]))
 
-(define (flatteno xss xs)
+(define (flattenᵒ xss xs)
   (conde
    [(== xss '()) (== xs '())]
    [(fresh (a d res)
            (== xss `(,a . ,d))
-           (flatteno d res)
-           (appendo a res xs))]))
+           (flattenᵒ d res)
+           (appendᵒ a res xs))]))
 
 (define (⊆* ∈)
   (lambda (xs ys)
@@ -148,29 +149,52 @@ A literal is either a symbol, or a negation of a symbol (¬ x).
 ;; should be the final state: all the variables are assigned.
 (define (finalo m f)
   (fresh (vars vars^ c cs)
-         (flatteno f vars^)
-         (rem-dupo vars^ vars)
+         (flattenᵒ f vars^)
+         (rem-dupᵒ vars^ vars)
          (⊆ m vars)
          (⊆ vars m)))
 
-(define (removeo xs x ys)
+(define (removeᵒ xs x ys)
   (conde
    [(== xs '()) (== ys '())]
    [(fresh (a d ys^)
            (== xs `(,a . ,d))
            (conde
-            [(== a x) (removeo d x ys)]
+            [(== a x) (removeᵒ d x ys)]
             [(=/= a x)
-             (removeo d x ys^)
+             (removeᵒ d x ys^)
              (== ys `(,a . ,ys^))]))]))
 
-(define (c/unitpropo c x c^)
+(define (c/unitpropᵒ c x c^)
   (conde
    [(∈ x c) (== c^ #t)]
-   [(∃ (¬x ← c) (nego x ¬x) (∉ x c) (removeo c ¬x c^))]
+   [(∃ (¬x ← c) (negᵒ x ¬x) (∉ x c) (removeᵒ c ¬x c^))]
    [(↑ c x) (== c c^)]))
 
-;; TODO: mapo, filtero
+(define (mapfilterᵒ xs p f ys)
+  (conde
+   [(== xs '()) (== ys '())]
+   [(fresh (a a^ d r ys^)
+           (== xs `(,a . ,d))
+           (f a a^)
+           (p a^ r)
+           (conde
+            [(== r #t)
+             (mapfilterᵒ d p f ys^)
+             (== ys `(,a^ . ,ys^))]
+            [(== r #f)
+             (mapfilterᵒ d p f ys)]))]))
+
+;; Note: an empty disjunction is false; an empty conjunction is true
+
+(define (unitpropᵒ f x f^)
+  (conde
+   [(== f '()) (== f^ '())]
+   [(mapfilterᵒ
+     f
+     (lambda (a r) (conde [(== a #t) (== r #f)] [(=/= a #t) (== r #t)]))
+     (lambda (c c^) (c/unitpropᵒ c x c^))
+     f^)]))
 
 (define (stepᵒ f d m f^ d^ m^)
   (conde
@@ -179,7 +203,7 @@ A literal is either a symbol, or a negation of a symbol (¬ x).
            (∈ c f)
            (== c `(,x))
            (↑ m x)
-           (unitpropo f x f^)
+           (unitpropᵒ f x f^)
            (== d d^)
            (== m^ `(,x . ,m)))]))
 
@@ -216,8 +240,8 @@ A literal is either a symbol, or a negation of a symbol (¬ x).
    [(fresh (dl ds ndl m1 m2)
            ;; TODO: when reach a conflict
            (== d `(,dl . ,ds))
-           (splito m m1 dl m2)
-           (nego dl ndl)
+           (splitᵒ m m1 dl m2)
+           (negᵒ dl ndl)
            (↑ m2 ndl)
            (== m^ `(,ndl ,m2))
            (== d^ d))]))
@@ -225,16 +249,16 @@ A literal is either a symbol, or a negation of a symbol (¬ x).
 ;; TODO: failed to disprove something
 (define (dpllo d m f d^ m^)
   (fresh (d* m* x c)
-         (formulao f)
-         (assignmento m)
-         (consistento m)
-         (consistento m*)
+         (formulaᵒ f)
+         (assignmentᵒ m)
+         (consistentᵒ m)
+         (consistentᵒ m*)
          (stepo d m f d* m*)
          (conde
           [(== m* 'fail) (== m^ 'fail)]
           [(finalo m* f)
            (f/⊨ m^ f) ;;TODO: necessary?
-           (consistento m*)
+           (consistentᵒ m*)
            (== m* m^)]
           [(=/= m* 'fail)
            (↑ m* x) (∈ x c) (∈ c f)

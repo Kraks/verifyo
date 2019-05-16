@@ -3,162 +3,162 @@
 (load "dpll.scm")
 
 (test "a is a literal"
-      (run 1 (q) (lito 'a))
+      (run 1 (q) (litᵒ 'a))
       '((_.0)))
 
 (test "1 is not a literal"
-      (run 1 (q) (lito 1))
+      (run 1 (q) (litᵒ 1))
       '())
 
 (test "() is not a literal"
-      (run 1 (q) (lito '()))
+      (run 1 (q) (litᵒ '()))
       '())
 
 (test "(a) is not a literal"
-      (run 1 (q) (lito '(a)))
+      (run 1 (q) (litᵒ '(a)))
       '())
 
 (test "(¬ a) is a literal"
-      (run 1 (q) (lito '(¬ a)))
+      (run 1 (q) (litᵒ '(¬ a)))
       '((_.0)))
 
 (test "(¬ 1) is not a literal"
-      (run 1 (q) (lito '(¬ 1)))
+      (run 1 (q) (litᵒ '(¬ 1)))
       '())
 
 (test "(¬ (a)) is not a literal"
-      (run 1 (q) (lito '(¬ (a))))
+      (run 1 (q) (litᵒ '(¬ (a))))
       '())
 
 (test "(a b c) is a clause"
-      (run 1 (q) (clauseo '(a b c)))
+      (run 1 (q) (clauseᵒ '(a b c)))
       '((_.0)))
 
 (test "(a b c (¬ d)) is a clause"
-      (run 1 (q) (clauseo '(a b c (¬ d))))
+      (run 1 (q) (clauseᵒ '(a b c (¬ d))))
       '((_.0)))
 
 (test "(a b (c)) is not a clause"
-      (run 1 (q) (clauseo '(a b (c))))
+      (run 1 (q) (clauseᵒ '(a b (c))))
       '())
 
 (test "((a b c) (d e f)) is a CNF formula"
-      (run 1 (q) (formulao '((a b c) (d e f))))
+      (run 1 (q) (formulaᵒ '((a b c) (d e f))))
       '((_.0)))
 
 (test "((a b c) (d e f) ((¬ a))) is a CNF formula"
-      (run 1 (q) (formulao '((a b c) (d e f) ((¬ a)))))
+      (run 1 (q) (formulaᵒ '((a b c) (d e f) ((¬ a)))))
       '((_.0)))
 
 (test "((a b c) (d e f) ((¬ a)) a) is not a CNF formula"
-      (run 1 (q) (formulao '((a b c) (d e f) ((¬ a)) a)))
+      (run 1 (q) (formulaᵒ '((a b c) (d e f) ((¬ a)) a)))
       '())
 
 ;======================================================
 
 (test "'(a b c) ∩ '(a b c) ≡ '(a b c)"
-      (run 1 (q) (intersecto '(a b c) '(a b c) '(a b c)))
+      (run 1 (q) (∩ '(a b c) '(a b c) '(a b c)))
       '((_.0)))
 
 (test "'(a) ∩ '(a b c) ≡ '(a)"
-      (run 1 (q) (intersecto '(a) '(a b c) '(a)))
+      (run 1 (q) (∩ '(a) '(a b c) '(a)))
       '((_.0)))
 
 (test "'(a) ∩ '() ≡ '()"
-      (run 1 (q) (intersecto '(a) '() '()))
+      (run 1 (q) (∩ '(a) '() '()))
       '((_.0)))
 
 (test "'() ∩ '(a) ≡ '()"
-      (run 1 (q) (intersecto '() '(a) '()))
+      (run 1 (q) (∩ '() '(a) '()))
       '((_.0)))
 
 (test "'(a b) ∩ '(a b c) ≡ '(a b)"
-      (run 1 (q) (intersecto '(a b) '(a b c) '(a b)))
+      (run 1 (q) (∩ '(a b) '(a b c) '(a b)))
       '((_.0)))
 
 (test "'(a b) ∩ '(a b c) ≡ {q}"
-      (run* (q) (intersecto '(a b) '(a b c) q))
+      (run* (q) (∩'(a b) '(a b c) q))
       '(((a b))))
 
 ;======================================================
 
-(test "(nego p (¬ p))"
-      (run 1 (q) (nego 'p '(¬ p)))
+(test "(negᵒ p (¬ p))"
+      (run 1 (q) (negᵒ 'p '(¬ p)))
       '((_.0)))
 
-(test "reverse nego identity"
+(test "reverse negᵒ identity"
       (run 1 (q1 q2)
-           (nego 'p q1)
-           (nego q1 q2)
+           (negᵒ 'p q1)
+           (negᵒ q1 q2)
            (== q2 'p))
       '((((¬ p) p))))
 
 ;======================================================
 
-(test "(splito '(a b c) '() 'a '(b c)"
-      (run 1 (q) (splito '(a b c) '() 'a '(b c)))
+(test "(splitᵒ '(a b c) '() 'a '(b c)"
+      (run 1 (q) (splitᵒ '(a b c) '() 'a '(b c)))
       '((_.0)))
 
-(test "(splito '(a b c) '(a) 'b '(c)"
-      (run 1 (q) (splito '(a b c) '(a) 'b '(c)))
+(test "(splitᵒ '(a b c) '(a) 'b '(c)"
+      (run 1 (q) (splitᵒ '(a b c) '(a) 'b '(c)))
       '((_.0)))
 
-(test "(splito '(a b c d e) '(a b c d) 'e '()"
-      (run 1 (q) (splito '(a b c d e) '(a b c d) 'e '()))
+(test "(splitᵒ '(a b c d e) '(a b c d) 'e '()"
+      (run 1 (q) (splitᵒ '(a b c d e) '(a b c d) 'e '()))
       '((_.0)))
 
-(test "(splito '(a b c d e) '(a b c d) 'e '()"
-      (run 1 (q) (splito '(a b c d e) '(a b c d) 'g q))
+(test "(splitᵒ '(a b c d e) '(a b c d) 'e '()"
+      (run 1 (q) (splitᵒ '(a b c d e) '(a b c d) 'g q))
       '())
 
 ;======================================================
 
-(test "(rem-dupo '(a b c a) '(b c a))"
-      (run 1 (q) (rem-dupo '(a b c a) '(b c a)))
+(test "(rem-dupᵒ '(a b c a) '(b c a))"
+      (run 1 (q) (rem-dupᵒ '(a b c a) '(b c a)))
       '((_.0)))
 
-(test "(rem-dupo '(a b c b a) '(c b a))"
-      (run 1 (q) (rem-dupo '(a b c b a) '(c b a)))
+(test "(rem-dupᵒ '(a b c b a) '(c b a))"
+      (run 1 (q) (rem-dupᵒ '(a b c b a) '(c b a)))
       '((_.0)))
 
-(test "(rem-dupo '() '())"
-      (run 1 (q) (rem-dupo '() '()))
+(test "(rem-dupᵒ '() '())"
+      (run 1 (q) (rem-dupᵒ '() '()))
       '((_.0)))
 
-(test "(rem-dupo '(a a a) '(a))"
-      (run 1 (q) (rem-dupo '(a a a) '(a)))
+(test "(rem-dupᵒ '(a a a) '(a))"
+      (run 1 (q) (rem-dupᵒ '(a a a) '(a)))
       '((_.0)))
 
-(test "(flatteno '((a b c) (d e f)) '(a b c d e f))"
-      (run 1 (q) (flatteno '((a b c) (d e f)) '(a b c d e f)))
+(test "(flattenᵒ '((a b c) (d e f)) '(a b c d e f))"
+      (run 1 (q) (flattenᵒ '((a b c) (d e f)) '(a b c d e f)))
       '((_.0)))
 
-(test "(flatteno '((a b c) ()) '(a b c))"
-      (run 1 (q) (flatteno '((a b c) ()) '(a b c)))
+(test "(flattenᵒ '((a b c) ()) '(a b c))"
+      (run 1 (q) (flattenᵒ '((a b c) ()) '(a b c)))
       '((_.0)))
 
-(test "(flatteno '(((¬ a) b c) ((¬ d))) '((¬ a) b c (¬ d)))"
-      (run 1 (q) (flatteno '(((¬ a) b c) ((¬ d))) '((¬ a) b c (¬ d))))
+(test "(flattenᵒ '(((¬ a) b c) ((¬ d))) '((¬ a) b c (¬ d)))"
+      (run 1 (q) (flattenᵒ '(((¬ a) b c) ((¬ d))) '((¬ a) b c (¬ d))))
       '((_.0)))
 
-(test "(removeo '() 'a '())"
-      (run 1 (q) (removeo '() 'a '()))
+(test "(removeᵒ '() 'a '())"
+      (run 1 (q) (removeᵒ '() 'a '()))
       '((_.0)))
 
-(test "(removeo '(a) 'a '())"
-      (run 1 (q) (removeo '(a) 'a '()))
+(test "(removeᵒ '(a) 'a '())"
+      (run 1 (q) (removeᵒ '(a) 'a '()))
       '((_.0)))
 
-(test "(removeo '(a a a) 'a '())"
-      (run 1 (q) (removeo '(a a a) 'a '()))
+(test "(removeᵒ '(a a a) 'a '())"
+      (run 1 (q) (removeᵒ '(a a a) 'a '()))
       '((_.0)))
 
-(test "(removeo '(a b a c a) 'a '(b c))"
-      (run 1 (q) (removeo '(a b a c a) 'a '(b c)))
+(test "(removeᵒ '(a b a c a) 'a '(b c))"
+      (run 1 (q) (removeᵒ '(a b a c a) 'a '(b c)))
       '((_.0)))
 
-(test "(removeo '(b c) 'a '(b c))"
-      (run 1 (q) (removeo '(b c) 'a '(b c)))
+(test "(removeᵒ '(b c) 'a '(b c))"
+      (run 1 (q) (removeᵒ '(b c) 'a '(b c)))
       '((_.0)))
 
 (test "(⊆ '(a b c) '(c b a))"
@@ -171,33 +171,76 @@
 
 ;======================================================
 
-(test "(c/unitpropo '(a b c) 'b #t)"
-      (run 1 (q) (c/unitpropo '(a b c) 'b #t))
+(test "(c/unitpropᵒ '(a b c) 'b #t)"
+      (run 1 (q) (c/unitpropᵒ '(a b c) 'b #t))
       '((_.0)))
 
-(test "(c/unitpropo '(a (¬ b) c) '(¬ b) #t)"
-      (run 1 (q) (c/unitpropo '(a (¬ b) c) '(¬ b) #t))
+(test "(c/unitpropᵒ '(b) '(¬ b) '())"
+      (run 1 (q) (c/unitpropᵒ '(b) '(¬ b) '()))
       '((_.0)))
 
-(test "(c/unitpropo '(a b c) 'd '(a b c))"
-      (run 1 (q) (c/unitpropo '(a b c) 'd '(a b c)))
+(test "(c/unitpropᵒ '(a (¬ b) c) '(¬ b) #t)"
+      (run 1 (q) (c/unitpropᵒ '(a (¬ b) c) '(¬ b) #t))
       '((_.0)))
 
-(test "(c/unitpropo '(a b c b) 'b #t)"
-      (run 1 (q) (c/unitpropo '(a b c b) 'b #t))
+(test "(c/unitpropᵒ '(a b c) 'd '(a b c))"
+      (run 1 (q) (c/unitpropᵒ '(a b c) 'd '(a b c)))
       '((_.0)))
 
-(test "(c/unitpropo '(a b c (¬ b) b) 'b #t)"
-      (run 1 (q) (c/unitpropo '(a b c (¬ b) b) 'b #t))
+(test "(c/unitpropᵒ '(a b c b) 'b #t)"
+      (run 1 (q) (c/unitpropᵒ '(a b c b) 'b #t))
       '((_.0)))
 
-(test "(c/unitpropo '(a c (¬ b)) 'b '(a c))"
-      (run 1 (q) (c/unitpropo '(a c (¬ b)) 'b '(a c)))
+(test "(c/unitpropᵒ '(a b c (¬ b) b) 'b #t)"
+      (run 1 (q) (c/unitpropᵒ '(a b c (¬ b) b) 'b #t))
       '((_.0)))
 
-(test "(c/unitpropo '(a c (¬ b) b) 'b '(a c))"
-      (run 1 (q) (c/unitpropo '(a c (¬ b) b) 'b '(a c)))
+(test "(c/unitpropᵒ '(a c (¬ b)) 'b '(a c))"
+      (run 1 (q) (c/unitpropᵒ '(a c (¬ b)) 'b '(a c)))
+      '((_.0)))
+
+(test "(c/unitpropᵒ '(a c (¬ b) b) 'b '(a c))"
+      (run 1 (q) (c/unitpropᵒ '(a c (¬ b) b) 'b '(a c)))
       '())
+
+(test "(mapfilterᵒ '(a b) (λ (_ r) (== r #t)) (λ (x x^) (== x^ `(,x))) '((a) (b)))"
+      (run 1 (q)
+           (mapfilterᵒ '(a b)
+                       (lambda (_ r) (== r #t))
+                       (lambda (x x^) (== x^ `(,x)))
+                       '((a) (b))))
+      '((_.0)))
+
+(test "(mapfilterᵒ '(a b) (λ (_ r) (== r #t)) (λ (x x^) (== x^ `(,x))) {q})"
+      (run 1 (q)
+           (mapfilterᵒ '(a b)
+                       (lambda (_ r) (== r #t))
+                       (lambda (x x^) (== x^ `(,x)))
+                       q))
+      '((((a) (b)))))
+
+(test "(mapfilterᵒ {q} (λ (_ r) (== r #t)) (λ (x x^) (== x^ `(,x))) '((a) (b)))"
+      (run 1 (q)
+           (mapfilterᵒ q
+                       (lambda (_ r) (== r #t))
+                       (lambda (x x^) (== x^ `(,x)))
+                       '((a) (b))))
+      '(((a b))))
+
+(test "(unitpropᵒ '((a b) (c d)) 'b '((c d)))"
+      (run 1 (q)
+           (unitpropᵒ '((a b) (c d)) 'b q))
+      '((((c d)))))
+
+(test "(unitpropᵒ '((a b) (b c d)) 'b '())"
+      (run 1 (q)
+           (unitpropᵒ '((a b) (b c d)) 'b q))
+      '((())))
+
+(test "(unitpropᵒ '((a b) (c d) (d (¬ b))) 'b '((c d) (d)))"
+      (run 1 (q)
+           (unitpropᵒ '((a b) (c d) (d (¬ b))) 'b q))
+      '((((c d) (d)))))
 
 ;======================================================
 
@@ -255,7 +298,7 @@
 
 (test "{q} ⊨ ((a) (b c e) ((¬ b)) ((¬ c)))"
       (run 1 (q)
-           (consistento q)
+           (consistentᵒ q)
            (f/⊨ q '((a) (b c e) ((¬ b)) ((¬ c)))))
       '(((a (¬ b) (¬ c) e))))
 
