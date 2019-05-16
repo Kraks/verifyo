@@ -206,6 +206,45 @@ A literal is either a symbol, or a negation of a symbol (¬ x).
                 (== c `(,a . ,d))
                 (=/= d '()))])))
 
+(define-syntax ∃/lit
+  (syntax-rules (←)
+    ((_ (x ← c ← f) rel ...)
+     (fresh (x c)
+            (∈ c f)
+            (∈ x c)
+            rel ...))))
+
+(define-syntax ∃/clause
+  (syntax-rules (← with)
+    ((_ (c ← f) (with v ...) rel ...)
+     (fresh (c v ...)
+            (∈ c f)
+            rel ...))))
+
+(define-syntax ∃/mt-clause
+  (syntax-rules (with)
+    ((_ (f) (with v ...) rel ...)
+     (∃/clause (c ← f) (with v ...) (== c '()) rel ...))))
+
+(define (decisionᵒ d x f d^)
+  (== d `((,x ,f) . ,d^)))
+
+(define (push-decisionᵒ d x f d^)
+  (decisionᵒ d^ x f d))
+
+(define (pop-decisionᵒ d x f d^)
+  (decisionᵒ d x f d^))
+
+(define (substᵒ xs x y ys)
+  (∨ [(== xs '()) (== ys '())]
+     [(∃ (a d ys^)
+         (== xs `(,a . ,d))
+         (∨ [(== a x)
+             (== ys `(,y . ,d))]
+            [(=/= a x)
+             (substᵒ d x y ys^)
+             (== ys `(,a . ,ys^))]))]))
+
 (define (step/unitᵒ f d m f^ d^ m^)
   (∧ (∄/mt-clause f)
      (∃/unit ((x) ← f)
@@ -214,35 +253,22 @@ A literal is either a symbol, or a negation of a symbol (¬ x).
              (== d^ d)
              (== m^ `(,x . ,m)))))
 
-(define (push-decisionᵒ x f d d^)
-  (== d^ `((,x ,f) . ,d)))
-
-(define (pop-decisionᵒ x f d d^)
-  (== d `((,x ,f) . ,d^)))
-
 (define (step/decideᵒ f d m f^ d^ m^)
-  (∃ (x c)
-     (∄/unit f)
+  (∧ (∄/unit f)
      (∄/mt-clause f)
-     (∈ c f)
-     (∈ x c)
-     (↑ m x)
-     (unitpropᵒ f x f^)
-     (push-decisionᵒ x f d d^)
-     (== m^ `(,x . ,m))))
-
-(define (substᵒ xs x y ys)
-  (∨ [(== xs '()) (== ys '())]
-     [(∃ (a d ys^)
-         (== xs `(,a . ,d))
-         (∨
-          [(== a x)
-           (== ys `(,y . ,d))]
-          [(=/= a x)
-           (substᵒ d x y ys^)
-           (== ys `(,a . ,ys^))]))]))
+     (∃/lit (x ← c ← f)
+            (↑ m x)
+            (unitpropᵒ f x f^)
+            (push-decisionᵒ d x f d^)
+            (== m^ `(,x . ,m)))))
 
 (define (step/backtrackᵒ f d m f^ d^ m^)
+  (∃/mt-clause (f) (with x ¬x ^f)
+               (pop-decisionᵒ d x ^f d^)
+               (negᵒ x ¬x)
+               (unitpropᵒ ^f ¬x f^)
+               (substᵒ m x ¬x m^)))
+#|
   (∃ (c x ¬x ^f)
      (∈ c f)
      (== c '())
@@ -250,6 +276,7 @@ A literal is either a symbol, or a negation of a symbol (¬ x).
      (negᵒ x ¬x)
      (unitpropᵒ ^f ¬x f^)
      (substᵒ m x ¬x m^)))
+|#
 
 (define (stepᵒ f d m f^ d^ m^)
   (∨
