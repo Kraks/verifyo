@@ -141,12 +141,62 @@
       (run 1 (q) (flatteno '(((¬ a) b c) ((¬ d))) '((¬ a) b c (¬ d))))
       '((_.0)))
 
+(test "(removeo '() 'a '())"
+      (run 1 (q) (removeo '() 'a '()))
+      '((_.0)))
+
+(test "(removeo '(a) 'a '())"
+      (run 1 (q) (removeo '(a) 'a '()))
+      '((_.0)))
+
+(test "(removeo '(a a a) 'a '())"
+      (run 1 (q) (removeo '(a a a) 'a '()))
+      '((_.0)))
+
+(test "(removeo '(a b a c a) 'a '(b c))"
+      (run 1 (q) (removeo '(a b a c a) 'a '(b c)))
+      '((_.0)))
+
+(test "(removeo '(b c) 'a '(b c))"
+      (run 1 (q) (removeo '(b c) 'a '(b c)))
+      '((_.0)))
+
 (test "(⊆ '(a b c) '(c b a))"
       (run 1 (q) (⊆ '(a b c) '(c b a)))
       '((_.0)))
 
 (test "(⊆ '(a b c) '(c b))"
       (run 1 (q) (⊆ '(a b c) '(c b)))
+      '())
+
+;======================================================
+
+(test "(c/unitpropo '(a b c) 'b #t)"
+      (run 1 (q) (c/unitpropo '(a b c) 'b #t))
+      '((_.0)))
+
+(test "(c/unitpropo '(a (¬ b) c) '(¬ b) #t)"
+      (run 1 (q) (c/unitpropo '(a (¬ b) c) '(¬ b) #t))
+      '((_.0)))
+
+(test "(c/unitpropo '(a b c) 'd '(a b c))"
+      (run 1 (q) (c/unitpropo '(a b c) 'd '(a b c)))
+      '((_.0)))
+
+(test "(c/unitpropo '(a b c b) 'b #t)"
+      (run 1 (q) (c/unitpropo '(a b c b) 'b #t))
+      '((_.0)))
+
+(test "(c/unitpropo '(a b c (¬ b) b) 'b #t)"
+      (run 1 (q) (c/unitpropo '(a b c (¬ b) b) 'b #t))
+      '((_.0)))
+
+(test "(c/unitpropo '(a c (¬ b)) 'b '(a c))"
+      (run 1 (q) (c/unitpropo '(a c (¬ b)) 'b '(a c)))
+      '((_.0)))
+
+(test "(c/unitpropo '(a c (¬ b) b) 'b '(a c))"
+      (run 1 (q) (c/unitpropo '(a c (¬ b) b) 'b '(a c)))
       '())
 
 ;======================================================
@@ -233,7 +283,12 @@
       (run 1 (d m) (dpllo '() '() '((a b) ((¬ b))) d m))
       '(((_.0 ((¬ b) a)))))
 
+
 #|
+(test "solve '((a b) (c d) ((¬ c)) ((¬ b)))"
+(run 1 (d m) (dpllo '() '() '((a b) (c d) ((¬ c)) ((¬ b))) d m))
+'())
+
 (test "disprove '((a) ((¬ a)))"
       (run 1 (d m) (dpllo '() '() '((a) ((¬ a))) d 'fail))
       '())

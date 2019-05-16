@@ -22,6 +22,8 @@ A literal is either a symbol, or a negation of a symbol (¬ x).
 
 (define-syntax ∃
   (syntax-rules (←)
+    ((_ (x = (f xs ...)) rel ...)
+     (fresh (x) (f xs ... x) rel ...))
     ((_ (x ← xs) rel ...)
      (fresh (x) (∈ x xs) rel ...))
     ((_ (x ...) rel ...)
@@ -74,22 +76,19 @@ A literal is either a symbol, or a negation of a symbol (¬ x).
 
 ;; variable x is undefined in model m.
 (define (↑ m x)
-  (fresh (nx)
-         (nego x nx)
-         (∉ nx m)
-         (∉ x m)))
+  (∃ (¬x = (nego x)) (∉ ¬x m) (∉ x m)))
 
 ;; variable x is defined in model m.
 (define (↓ m x)
   (conde
    [(∈ x m)]
-   [(fresh (nx) (nego x nx) (∈ nx m))]))
+   [(∃ (¬x ← m) (nego x ¬x))]))
 
 (define (c/⊨ m c)
   (∃ (x ← c) (∈ x m)))
 
 (define (c/⊭ m c)
-  (∀ (x ← c) (∃ (nx ← m) (nego x nx))))
+  (∀ (x ← c) (∃ (¬x ← m) (nego x ¬x))))
 
 (define (f/⊨ m f)
   (∀ (c ← f) (c/⊨ m c)))
@@ -98,18 +97,15 @@ A literal is either a symbol, or a negation of a symbol (¬ x).
   (∃ (c ← f) (c/⊭ m c)))
 
 (define (splito pxq p x q)
-  (conde
-   [(== pxq '())
-    (== #t #f)]
-   [(fresh (a d p^)
-           (== pxq `(,a . ,d))
-           (conde
-            [(== a x)
-             (== p '())
-             (== q d)]
-            [(=/= a x)
-             (splito d p^ x q)
-             (== p `(,a . ,p^))]))]))
+  (fresh (a d p^)
+         (== pxq `(,a . ,d))
+         (conde
+          [(== a x)
+           (== p '())
+           (== q d)]
+          [(=/= a x)
+           (splito d p^ x q)
+           (== p `(,a . ,p^))])))
 
 (define (rem-dupo xs ys)
   (conde
@@ -157,6 +153,36 @@ A literal is either a symbol, or a negation of a symbol (¬ x).
          (⊆ m vars)
          (⊆ vars m)))
 
+(define (removeo xs x ys)
+  (conde
+   [(== xs '()) (== ys '())]
+   [(fresh (a d ys^)
+           (== xs `(,a . ,d))
+           (conde
+            [(== a x) (removeo d x ys)]
+            [(=/= a x)
+             (removeo d x ys^)
+             (== ys `(,a . ,ys^))]))]))
+
+(define (c/unitpropo c x c^)
+  (conde
+   [(∈ x c) (== c^ #t)]
+   [(∃ (¬x ← c) (nego x ¬x) (∉ x c) (removeo c ¬x c^))]
+   [(↑ c x) (== c c^)]))
+
+;; TODO: mapo, filtero
+
+(define (stepᵒ f d m f^ d^ m^)
+  (conde
+   ;; Unit Propogate
+   [(fresh (x c)
+           (∈ c f)
+           (== c `(,x))
+           (↑ m x)
+           (unitpropo f x f^)
+           (== d d^)
+           (== m^ `(,x . ,m)))]))
+
 ;; d is an auxiliary list that tracks decision literals (only added by Decide rule).
 ;; m is the model, i.e., the assignment.
 ;; ⟨d, m⟩ ↦ ⟨d^, m^⟩
@@ -172,7 +198,7 @@ A literal is either a symbol, or a negation of a symbol (¬ x).
            (== m^ `(,x . ,m))
            (== d^ d))]
    ;; Decide
-   [(fresh (x nx c)
+   [(fresh (x c)
            ;; TODO: when do not have unit variable
            (∈ c f)
            (∈ x c)
