@@ -2,6 +2,10 @@
 (load "../mk/test-check.scm")
 (load "dpll.scm")
 
+(test "(∨ [(== q 1)] [(== q 2)]"
+      (run* (q) (∨ [(== q 1)] [(== q 2)]))
+      '((1) (2)))
+
 (test "a is a literal"
       (run 1 (q) (litᵒ 'a))
       '((_.0)))
@@ -313,6 +317,18 @@
       (run 1 (f d m)
            (step/decideᵒ '((f e) ((¬ f) g)) '((a ((a b c) (f e)))) '(a) f d m))
       '(((((g)) ((f ((f e) ((¬ f) g))) (a ((a b c) (f e)))) (f a)))))
+
+(test "(substᵒ '(a b c) 'a '(¬ a) '((¬ a) b c))"
+      (run 1 (q) (substᵒ '(a b c) 'a '(¬ a) '((¬ a) b c)))
+      '((_.0)))
+
+(test "(substᵒ '() 'a '(¬ a) '((¬ a) b c))"
+      (run 1 (q) (substᵒ '() 'a '(¬ a) '()))
+      '((_.0)))
+
+(test "(substᵒ '(b c (¬ a)) '(¬ a) 'a '(b c a))"
+      (run 1 (q) (substᵒ '(b c (¬ a)) '(¬ a) 'a q))
+      '(((b c a))))
 
 ;======================================================
 
