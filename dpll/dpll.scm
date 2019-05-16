@@ -196,16 +196,65 @@ A literal is either a symbol, or a negation of a symbol (¬ x).
      (lambda (c c^) (c/unitpropᵒ c x c^))
      f^)]))
 
+(define-syntax ∃/unit
+  (syntax-rules (←)
+    ((_ ((x) ← f) rel ...)
+     (fresh (x c)
+            (∈ c f)
+            (== c `(,x))
+            rel ...))))
+
+(define (∄/unit f)
+  (∀ (c ← f)
+     (conde
+      [(== c '())]
+      [(fresh (a d)
+              (== c `(,a . ,d))
+              (=/= d '()))])))
+
+(define (step/unitᵒ f d m f^ d^ m^)
+  (∃/unit ((x) ← f)
+          (↑ m x)
+          (unitpropᵒ f x f^)
+          (== d^ d)
+          (== m^ `(,x . ,m))))
+
+(define (push-decisionᵒ x f d d^)
+  (== d^ `((,x ,f) . ,d)))
+
+(define (pop-decisionᵒ x f d d^)
+  (== d `((,x ,f) . ,d^)))
+
+(define (step/decideᵒ f d m f^ d^ m^)
+  (fresh (x c)
+         (∄/unit f)
+         (∈ c f)
+         (∈ x c)
+         (↑ m x)
+         (unitpropᵒ f x f^)
+         (push-decisionᵒ x f d d^)
+         (== m^ `(,x . ,m))))
+
+(define (step/backtrackᵒ f d m f^ d^ m^)
+  (fresh (c x ¬x ^f)
+         (∈ c f)
+         (== c '())
+         (pop-decisionᵒ x ^f d d^)
+         (negᵒ x ¬x)
+         (unitpropᵒ ^f ¬x f^)
+         (== m^ `(,¬x . ,m)) ;;FIXME: seems d also need to save the old m; ow m^ would contains conflicted assignments, or use substo
+         ))
+
 (define (stepᵒ f d m f^ d^ m^)
   (conde
-   ;; Unit Propogate
-   [(fresh (x c)
-           (∈ c f)
-           (== c `(,x))
-           (↑ m x)
-           (unitpropᵒ f x f^)
-           (== d d^)
-           (== m^ `(,x . ,m)))]))
+   ;; Unit Propogate, only eliminates real unit clauses
+   [(step/unitᵒ f d m f^ d^ m^)]
+   ;; Decide
+   [(step/decideᵒ f d m f^ d^ m^)]
+   ;; Backtrack, just back jump to the most recent decision
+   [(step/backtrackᵒ f d m f^ d^ m^)]))
+
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 
 ;; d is an auxiliary list that tracks decision literals (only added by Decide rule).
 ;; m is the model, i.e., the assignment.

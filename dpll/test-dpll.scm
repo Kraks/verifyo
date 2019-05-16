@@ -237,10 +237,82 @@
            (unitpropᵒ '((a b) (b c d)) 'b q))
       '((())))
 
+(test "(unitpropᵒ '() 'b '())"
+      (run 1 (q)
+           (unitpropᵒ '() 'b q))
+      '((())))
+
 (test "(unitpropᵒ '((a b) (c d) (d (¬ b))) 'b '((c d) (d)))"
       (run 1 (q)
            (unitpropᵒ '((a b) (c d) (d (¬ b))) 'b q))
       '((((c d) (d)))))
+
+(test "(step/unitᵒ '((a b) (c)) '() '(c) {f} {d} {m})"
+      (run 1 (f d m) (step/unitᵒ '((a b) (c)) '() '(c) f d m))
+      ; an ill-state, an assignment is made, but not boolean propagated
+      '())
+
+(test "(step/unitᵒ '((a b) (c)) '() '() {f} {d} {m})"
+      (run 1 (f d m)
+           (step/unitᵒ '((a b) (c)) '() '() f d m))
+      '(((((a b)) () (c)))))
+
+(test "(step/unitᵒ '((a b) (c)) '() '() {f} {d} {m})"
+      (run* (f d m)
+           (step/unitᵒ '((a b) (c)) '() '() f d m))
+      '(((((a b)) () (c)))))
+
+(test "(step/unitᵒ '((a b) (c) (d) (e f)) '() '() {f} {d} {m})"
+      (run* (f d m)
+            (step/unitᵒ '((a b) (c) (d) (e f)) '() '() f d m))
+      '(((((a b) (d) (e f)) () (c))) ((((a b) (c) (e f)) () (d)))))
+
+(test "(∄/unit '((a b) (c d)))"
+      (run 1 (q) (∄/unit '((a b) (c d))))
+      '((_.0)))
+
+(test "(∄/unit '())"
+      (run 1 (q) (∄/unit '()))
+      '((_.0)))
+
+(test "(∄/unit '((a)))"
+      (run 1 (q) (∄/unit '((a))))
+      '())
+
+(test "(∄/unit '((a) (b)))"
+      (run 1 (q) (∄/unit '((a) (b))))
+      '())
+
+(test "(∄/unit '((a) (b) (d c)))"
+      (run 1 (q) (∄/unit '((a) (b) (d c))))
+      '())
+
+(test "(∄/unit '((a e) (b) (d c)))"
+      (run 1 (q) (∄/unit '((a e) (b) (d c))))
+      '())
+
+(test "(step/decideᵒ '((a b c) (a e)) '() '() {f} {d} {m})"
+      (run 1 (f d m)
+           (step/decideᵒ '((a b c) (a e)) '() '() f d m))
+      '(((()                    ; f is reduced to empty (ie true)
+          ((a ((a b c) (a e)))) ; the decision stack contains a ↦ true, and the formula before decision
+          (a)                   ; the (partial) model
+          ))))
+
+(test "(step/decideᵒ '((a b c) (f e)) '() '() {f} {d} {m})"
+      (run 1 (f d m)
+           (step/decideᵒ '((a b c) (f e)) '() '() f d m))
+      '(((((f e)) ((a ((a b c) (f e)))) (a)))))
+
+(test "(step/decideᵒ '((f e)) '((a ((a b c) (f e)))) '(a) {f} {d} {m})"
+      (run 1 (f d m)
+           (step/decideᵒ '((f e)) '((a ((a b c) (f e)))) '(a) f d m))
+      '(((() ((f ((f e))) (a ((a b c) (f e)))) (f a)))))
+
+(test "(step/decideᵒ '((f e) ((¬ f) g)) '((a ((a b c) (f e)))) '(a) {f} {d} {m})"
+      (run 1 (f d m)
+           (step/decideᵒ '((f e) ((¬ f) g)) '((a ((a b c) (f e)))) '(a) f d m))
+      '(((((g)) ((f ((f e) ((¬ f) g))) (a ((a b c) (f e)))) (f a)))))
 
 ;======================================================
 
