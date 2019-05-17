@@ -330,6 +330,19 @@
       (run 1 (q) (substᵒ '(b c (¬ a)) '(¬ a) 'a q))
       '(((b c a))))
 
+(test "(step/unitᵒ '((a b) ((¬ a) (¬ b)) (b)) '() '() {f} {d} {m})"
+      (run 1 (f d m) (step/unitᵒ '((a b) ((¬ a) (¬ b)) (b)) '() '() f d m))
+      '((((((¬ a))) () (b)))))
+
+(test "(step/unitᵒ '(((¬ a))) '() '(b) f d m)"
+      (run 1 (f d m) (step/unitᵒ '(((¬ a))) '() '(b) f d m))
+      '(((() () ((¬ a) b)))))
+
+;; can not decide, since there is a unit clause
+(test "(step/decideᵒ '(((¬ a))) '() '(b) f d m)"
+      (run 1 (f d m) (step/decideᵒ '(((¬ a))) '() '(b) f d m))
+      '())
+
 ;======================================================
 
 (test "(a b) ⊨ (a b)"
