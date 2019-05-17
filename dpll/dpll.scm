@@ -262,6 +262,7 @@ A literal is either a symbol, or a negation of a symbol (¬ x).
              (substᵒ d x y ys^)
              (== ys `(,a . ,ys^))]))]))
 
+;; Unit Propogate, only eliminates real unit clauses
 (define (step/unitᵒ f d m f^ d^ m^)
   (∧ (∄/mt-clause f)
      (∃/unit ((x) ← f)
@@ -279,6 +280,7 @@ A literal is either a symbol, or a negation of a symbol (¬ x).
             (push-decisionᵒ d x f d^)
             (== m^ `(,x . ,m)))))
 
+;; Backtrack, just back jump to the most recent decision
 (define (step/backtrackᵒ f d m f^ d^ m^)
   (∧ (∄/unit f)
      (∃/mt-clause (f) (with x ¬x ^f)
@@ -288,13 +290,9 @@ A literal is either a symbol, or a negation of a symbol (¬ x).
                   (substᵒ m x ¬x m^))))
 
 (define (stepᵒ f d m f^ d^ m^)
-  (∨
-   ;; Unit Propogate, only eliminates real unit clauses
-   [(step/unitᵒ f d m f^ d^ m^)]
-   ;; Decide
-   [(step/decideᵒ f d m f^ d^ m^)]
-   ;; Backtrack, just back jump to the most recent decision
-   [(step/backtrackᵒ f d m f^ d^ m^)]))
+  (∨ [(step/unitᵒ f d m f^ d^ m^)]
+     [(step/decideᵒ f d m f^ d^ m^)]
+     [(step/backtrackᵒ f d m f^ d^ m^)]))
 
 (define (dpllᵒ f d m f^ d^ m^)
   (∨ [(emptyᵒ f)
