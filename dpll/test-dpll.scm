@@ -6,6 +6,24 @@
       (run* (q) (∨ [(== q 1)] [(== q 2)]))
       '((1) (2)))
 
+(test "match list '(1 2 3)"
+      (run 1 (q) (listᵒ ((x . xs) ← '(1 2 3))
+                        (== x '1)
+                        (== xs '(2 3))))
+      '((_.0)))
+
+(test "match list '(1 2 3)"
+      (run 1 (q) (listᵒ ((x . xs) ← '(1 2 3))
+                        (== x q)
+                        (== xs '(2 3))))
+      '((1)))
+
+(test "match list '(1 2 3)"
+      (run 1 (q) (listᵒ ((x . xs) ← '(1 2 3))
+                        (== x '1)
+                        (== xs q)))
+      '(((2 3))))
+
 (test "a is a literal"
       (run 1 (q) (litᵒ 'a))
       '((_.0)))
@@ -343,6 +361,26 @@
       (run 1 (f d m) (step/decideᵒ '(((¬ a))) '() '(b) f d m))
       '())
 
+(test "(solveᵒ '((a b c)) m)"
+      (run 1 (m) (solveᵒ '((a b c)) m))
+      '(((a))))
+
+(test "(solveᵒ '((a b c) ((¬ a))) m)"
+      (run 1 (m) (solveᵒ '((a b c) ((¬ a))) m))
+      '(((b (¬ a)))))
+
+(test "(solveᵒ '((a b c) ((¬ a)) ((¬ b))) m)"
+      (run 1 (m) (solveᵒ '((a b c) ((¬ a)) ((¬ b))) m))
+      '(((c (¬ a) (¬ b)))))
+
+(test "(solveᵒ '((a b c) ((¬ a)) ((¬ b)) ((¬ c))) m)"
+      (run 1 (m) (solveᵒ '((a b c) ((¬ a)) ((¬ b)) ((¬ c))) m))
+      '((fail)))
+
+(test "(solveᵒ '((a) ((¬ a))) m)"
+      (run 1 (m) (solveᵒ '((a) ((¬ a))) m))
+      '((fail)))
+
 ;======================================================
 
 (test "(a b) ⊨ (a b)"
@@ -419,20 +457,7 @@
       (run 1 (q) (finalo '((¬ a) (¬ b) c) '((a) (b) (c a) (b c))))
       '((_.0)))
 
-(test "solve '((a b))"
-      (run 1 (d m) (dpllo '() '() '((a b)) d m))
-      '(((_.0 (b a)))))
-
-(test "solve '((a b) ((¬ b)))"
-      (run 1 (d m) (dpllo '() '() '((a b) ((¬ b))) d m))
-      '(((_.0 ((¬ b) a)))))
-
-
 #|
-(test "solve '((a b) (c d) ((¬ c)) ((¬ b)))"
-(run 1 (d m) (dpllo '() '() '((a b) (c d) ((¬ c)) ((¬ b))) d m))
-'())
-
 (test "disprove '((a) ((¬ a)))"
       (run 1 (d m) (dpllo '() '() '((a) ((¬ a))) d 'fail))
       '())
@@ -452,8 +477,3 @@
     (g)
     (h)
     ((¬ i))))
-
-;(time (run 1 (d m) (dpllo '() '() f1 d m)))
-;(time (run 1 (m) (f/⊨ m f1)))
-
-
