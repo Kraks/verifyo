@@ -52,11 +52,14 @@ A literal is either a symbol, or a negation of a symbol (¬ x).
 
 (define (non-emptyᵒ l) (=/= l '()))
 
+(define (symnumᵒ x)
+  (∨ [(symbolo x)] [(numbero x)]))
+
 (define (litᵒ l)
-  (∨ [(symbolo l)]
+  (∨ [(symnumᵒ l)]
      [(fresh (l^)
              (== l `(¬ ,l^))
-             (symbolo l^))]))
+             (symnumᵒ l^))]))
 
 (define (clauseᵒ c) (forall c litᵒ))
 
@@ -78,9 +81,9 @@ A literal is either a symbol, or a negation of a symbol (¬ x).
 (define (negᵒ p q)
   (∨ [(∃ (p^)
          (== p `(¬ ,p^))
-         (symbolo p^)
+         (symnumᵒ p^)
          (== q p^))]
-     [(symbolo p)
+     [(symnumᵒ p)
       (== q `(¬ ,p))]))
 
 ;; the model does not contain duplicates, or conflicted assignments.

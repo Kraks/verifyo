@@ -28,9 +28,9 @@
       (run 1 (q) (litᵒ 'a))
       '((_.0)))
 
-(test "1 is not a literal"
+(test "1 is a literal"
       (run 1 (q) (litᵒ 1))
-      '())
+      '((_.0)))
 
 (test "() is not a literal"
       (run 1 (q) (litᵒ '()))
@@ -44,9 +44,9 @@
       (run 1 (q) (litᵒ '(¬ a)))
       '((_.0)))
 
-(test "(¬ 1) is not a literal"
+(test "(¬ 1) is a literal"
       (run 1 (q) (litᵒ '(¬ 1)))
-      '())
+      '((_.0)))
 
 (test "(¬ (a)) is not a literal"
       (run 1 (q) (litᵒ '(¬ (a))))
@@ -413,6 +413,9 @@
       (run 1 (m) (solveᵒ f1 m))
       '((((¬ a) h (¬ i) g e (¬ f) (¬ d) b))))
 
+;(display (run 1 (m) (solveᵒ '((1 2) ((¬ 2))) m)))
+;(display (run 1 (m) (f/⊨ m '((1 2) ((¬ 2))))))
+
 ;======================================================
 
 (test "(a b) ⊨ (a b)"
@@ -471,7 +474,7 @@
       (run 1 (q)
            (consistentᵒ q)
            (f/⊨ q '((a) (b c e) ((¬ b)) ((¬ c)))))
-      '(((a (¬ b) (¬ c) e))))
+      '(((a e (¬ b) (¬ c)))))
 
 ;======================================================
 
