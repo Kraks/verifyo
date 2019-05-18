@@ -390,6 +390,29 @@
       (run 1 (m) (solveᵒ '((a) ((¬ a))) m))
       '((fail)))
 
+(test "(solveᵒ '((a) ((¬ a))) m)"
+      (run 1 (m) (solveᵒ '((a) ((¬ a))) m))
+      '((fail)))
+
+(test "(solveᵒ '((a b) ((¬ a)) ((¬ b))) m)"
+      (run 1 (m) (solveᵒ '((a b) ((¬ a)) ((¬ b))) m))
+      '((fail)))
+
+(define f1
+  '((a b c) (d e f) (g h i)
+    ((¬ a) (¬ c))
+    (b)
+    ((¬ d))
+    ((¬ f))
+    (e)
+    (g)
+    (h)
+    ((¬ i))))
+
+(test "(solveᵒ f1 m)"
+      (run 1 (m) (solveᵒ f1 m))
+      '((((¬ a) h (¬ i) g e (¬ f) (¬ d) b))))
+
 ;======================================================
 
 (test "(a b) ⊨ (a b)"
@@ -465,24 +488,3 @@
 (test "(finalo '((¬ a) (¬ b) c) '((a) (b) (c a) (b c)))"
       (run 1 (q) (finalo '((¬ a) (¬ b) c) '((a) (b) (c a) (b c))))
       '((_.0)))
-
-#|
-(test "disprove '((a) ((¬ a)))"
-      (run 1 (d m) (dpllo '() '() '((a) ((¬ a))) d 'fail))
-      '())
-
-(test "disprove '((a b) ((¬ a)) ((¬ b)))"
-      (run 1 (d m) (dpllo '() '() '((a b) ((¬ a)) ((¬ b))) d 'fail))
-      '())
-|#
-
-(define f1
-  '((a b c) (d e f) (g h i)
-    ((¬ a) (¬ c))
-    (b)
-    ((¬ d))
-    ((¬ f))
-    (e)
-    (g)
-    (h)
-    ((¬ i))))
