@@ -356,10 +356,13 @@
       (run 1 (f d m) (step/unitᵒ '(((¬ a))) '() '(b) f d m))
       '(((() () ((¬ a) b)))))
 
-;; can not decide, since there is a unit clause
 (test "(step/decideᵒ '(((¬ a))) '() '(b) f d m)"
       (run 1 (f d m) (step/decideᵒ '(((¬ a))) '() '(b) f d m))
-      '())
+      '(((()
+          (((¬ a) (((¬ a)))))
+          ((¬ a) b)))))
+
+;(test "(solveᵒ f '(a (¬ b) c))" (run 3 (f) (solveᵒ f '(a (¬ b) c))) '())
 
 (test "(solveᵒ '((a b c)) m)"
       (run 1 (m) (solveᵒ '((a b c)) m))
@@ -372,6 +375,12 @@
 (test "(solveᵒ '((a b c) ((¬ a)) ((¬ b))) m)"
       (run 1 (m) (solveᵒ '((a b c) ((¬ a)) ((¬ b))) m))
       '(((c (¬ a) (¬ b)))))
+
+(test "(solveᵒ f '(a (¬ b))"
+      (run 3 (f) (solveᵒ f '(a (¬ b))))
+      '(((((¬ b)) (a)))
+        ((((¬ b)) (a _.0)) (=/= ((_.0 b)) ((_.0 (¬ b)))))
+        ((((¬ b)) (a a)))))
 
 (test "(solveᵒ '((a b c) ((¬ a)) ((¬ b)) ((¬ c))) m)"
       (run 1 (m) (solveᵒ '((a b c) ((¬ a)) ((¬ b)) ((¬ c))) m))

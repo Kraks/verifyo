@@ -264,35 +264,35 @@ A literal is either a symbol, or a negation of a symbol (¬ x).
 
 ;; Unit Propogate, only eliminates real unit clauses
 (define (step/unitᵒ f d m f^ d^ m^)
-  (∧ (∄/mt-clause f)
-     (∃/unit ((x) ← f)
-             (↑ m x)
-             (unitpropᵒ f x f^)
-             (== d^ d)
-             (== m^ `(,x . ,m)))))
+  (∃/unit ((x) ← f)
+          (↑ m x)
+          (unitpropᵒ f x f^)
+          (== d^ d)
+          (== m^ `(,x . ,m))))
 
 (define (step/decideᵒ f d m f^ d^ m^)
-  (∧ (∄/unit f)
-     (∄/mt-clause f)
-     (∃/lit (x ← c ← f)
-            (↑ m x)
-            (unitpropᵒ f x f^)
-            (push-decisionᵒ d x f d^)
-            (== m^ `(,x . ,m)))))
+  (∃/lit (x ← c ← f)
+         (↑ m x)
+         (unitpropᵒ f x f^)
+         (push-decisionᵒ d x f d^)
+         (== m^ `(,x . ,m))))
 
 ;; Backtrack, just back jump to the most recent decision
 (define (step/backtrackᵒ f d m f^ d^ m^)
-  (∧ (∄/unit f)
-     (∃/mt-clause (f) (with x ¬x ^f)
-                  (pop-decisionᵒ d x ^f d^)
-                  (negᵒ x ¬x)
-                  (unitpropᵒ ^f ¬x f^)
-                  (substᵒ m x ¬x m^))))
+  (∃/mt-clause (f) (with x ¬x ^f)
+               (pop-decisionᵒ d x ^f d^)
+               (negᵒ x ¬x)
+               (unitpropᵒ ^f ¬x f^)
+               (substᵒ m x ¬x m^)))
 
 (define (stepᵒ f d m f^ d^ m^)
-  (∨ [(step/unitᵒ f d m f^ d^ m^)]
-     [(step/decideᵒ f d m f^ d^ m^)]
-     [(step/backtrackᵒ f d m f^ d^ m^)]))
+  (∨ [(∄/mt-clause f)
+      (step/unitᵒ f d m f^ d^ m^)]
+     [(∄/unit f)
+      (∄/mt-clause f)
+      (step/decideᵒ f d m f^ d^ m^)]
+     [(∄/unit f)
+      (step/backtrackᵒ f d m f^ d^ m^)]))
 
 (define (dpllᵒ f d m f^ d^ m^)
   (∨ [(emptyᵒ f)
