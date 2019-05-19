@@ -362,8 +362,6 @@
           (((¬ a) (((¬ a)))))
           ((¬ a) b)))))
 
-;(test "(solveᵒ f '(a (¬ b) c))" (run 3 (f) (solveᵒ f '(a (¬ b) c))) '())
-
 (test "(solveᵒ '((a b c)) m)"
       (run 1 (m) (solveᵒ '((a b c)) m))
       '(((a))))
@@ -415,6 +413,10 @@
 
 ;(display (run 1 (m) (solveᵒ '((1 2) ((¬ 2))) m)))
 ;(display (run 1 (m) (f/⊨ m '((1 2) ((¬ 2))))))
+
+(test "(solveᵒ f '(a (¬ b) c))"
+      (run 1 (f d m f^ d^ rule) (stepᵒ f d m f^ d^ '(a (¬ b) c) rule))
+      '())
 
 ;======================================================
 
