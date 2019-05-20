@@ -316,25 +316,31 @@
 (test "(step/decideᵒ '((a b c) (a e)) '() '() {f} {d} {m})"
       (run 1 (f d m)
            (step/decideᵒ '((a b c) (a e)) '() '() f d m))
-      '(((()                    ; f is reduced to empty (ie true)
-          ((a ((a b c) (a e)))) ; the decision stack contains a ↦ true, and the formula before decision
-          (a)                   ; the (partial) model
+      '(((()                       ; f is reduced to empty (ie true)
+          ((a () ((a b c) (a e)))) ; the decision stack contains a ↦ true, and the formula before decision
+          (a)                      ; the (partial) model
           ))))
 
 (test "(step/decideᵒ '((a b c) (f e)) '() '() {f} {d} {m})"
       (run 1 (f d m)
            (step/decideᵒ '((a b c) (f e)) '() '() f d m))
-      '(((((f e)) ((a ((a b c) (f e)))) (a)))))
+      '(((((f e))
+          ((a () ((a b c) (f e))))
+          (a)))))
 
 (test "(step/decideᵒ '((f e)) '((a ((a b c) (f e)))) '(a) {f} {d} {m})"
       (run 1 (f d m)
            (step/decideᵒ '((f e)) '((a ((a b c) (f e)))) '(a) f d m))
-      '(((() ((f ((f e))) (a ((a b c) (f e)))) (f a)))))
+      '(((()
+          ((f (a) ((f e))) (a ((a b c) (f e))))
+          (f a)))))
 
 (test "(step/decideᵒ '((f e) ((¬ f) g)) '((a ((a b c) (f e)))) '(a) {f} {d} {m})"
       (run 1 (f d m)
            (step/decideᵒ '((f e) ((¬ f) g)) '((a ((a b c) (f e)))) '(a) f d m))
-      '(((((g)) ((f ((f e) ((¬ f) g))) (a ((a b c) (f e)))) (f a)))))
+      '(((((g))
+          ((f (a) ((f e) ((¬ f) g))) (a ((a b c) (f e))))
+          (f a)))))
 
 (test "(substᵒ '(a b c) 'a '(¬ a) '((¬ a) b c))"
       (run 1 (q) (substᵒ '(a b c) 'a '(¬ a) '((¬ a) b c)))
@@ -359,7 +365,7 @@
 (test "(step/decideᵒ '(((¬ a))) '() '(b) f d m)"
       (run 1 (f d m) (step/decideᵒ '(((¬ a))) '() '(b) f d m))
       '(((()
-          (((¬ a) (((¬ a)))))
+          (((¬ a) (b) (((¬ a)))))
           ((¬ a) b)))))
 
 (test "(solveᵒ '((a b c)) m)"
@@ -453,7 +459,7 @@
           _.1
           ((¬ b) c)
           ()
-          ((a ((a . _.0))) . _.1)
+          ((a ((¬ b) c) ((a . _.0))) . _.1)
           _.2))))
 
 ;======================================================

@@ -246,14 +246,18 @@ A literal is either a symbol, or a negation of a symbol (¬ x).
     ((_ (f))
      (∃/clause (c ← f) (emptyᵒ c)))))
 
-(define (decisionᵒ d x f d^)
-  (== d `((,x ,f) . ,d^)))
+;; A decision is a triple of (x, m, f)
+;; x is the decision literal
+;; m is the model before making that decision
+;; f is the formula before making that decision
+(define (decisionᵒ d x m f d^)
+  (== d `((,x ,m ,f) . ,d^)))
 
-(define (push-decisionᵒ d x f d^)
-  (decisionᵒ d^ x f d))
+(define (push-decisionᵒ d x m f d^)
+  (decisionᵒ d^ x m f d))
 
-(define (pop-decisionᵒ d x f d^)
-  (decisionᵒ d x f d^))
+(define (pop-decisionᵒ d x m f d^)
+  (decisionᵒ d x m f d^))
 
 (define (substᵒ xs x y ys)
   (∨ [(emptyᵒ xs) (emptyᵒ ys)]
@@ -277,16 +281,16 @@ A literal is either a symbol, or a negation of a symbol (¬ x).
   (∃/lit (x ← c ← f)
          (↑ m x)
          (unitpropᵒ f x f^)
-         (push-decisionᵒ d x f d^)
+         (push-decisionᵒ d x m f d^)
          (== m^ `(,x . ,m))))
 
 ;; Backtrack, just back jump to the most recent decision
 (define (step/backtrackᵒ f d m f^ d^ m^)
-  (∃/mt-clause (f) (with x ¬x ^f)
-               (pop-decisionᵒ d x ^f d^)
+  (∃/mt-clause (f) (with x ¬x ^m ^f)
+               (pop-decisionᵒ d x ^m ^f d^)
                (negᵒ x ¬x)
                (unitpropᵒ ^f ¬x f^)
-               (substᵒ m x ¬x m^)))
+               (== m^ `(,¬x . ,^m))))
 
 (define (stepᵒ f d m f^ d^ m^ rule)
   (∨ [(∄/mt-clause f)
