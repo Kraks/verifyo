@@ -251,7 +251,7 @@ A literal is either a symbol, or a negation of a symbol (¬ x).
 ;; m is the model before making that decision
 ;; f is the formula before making that decision
 (define (decisionᵒ d x m f d^)
-  (== d `((,x ,m ,f) . ,d^)))
+  (== d `([,x ,m ,f] . ,d^)))
 
 (define (push-decisionᵒ d x m f d^)
   (decisionᵒ d^ x m f d))
@@ -289,6 +289,7 @@ A literal is either a symbol, or a negation of a symbol (¬ x).
   (∃/mt-clause (f) (with x ¬x ^m ^f)
                (pop-decisionᵒ d x ^m ^f d^)
                (negᵒ x ¬x)
+               (non-emptyᵒ ^f) ;; the formula from last step can not be trivially true
                (unitpropᵒ ^f ¬x f^)
                (== m^ `(,¬x . ,^m))))
 

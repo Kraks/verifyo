@@ -445,13 +445,15 @@
 ;(display (run 1 (m) (solveᵒ '((1 2) ((¬ 2))) m)))
 ;(display (run 1 (m) (f/⊨ m '((1 2) ((¬ 2))))))
 
-#|
 (test "(solveᵒ f '(a (¬ b) c))"
       (run 1 (f d m d^)
            (non-emptyᵒ f)
+           (∄/mt-clause f)
            (dpllᵒ f d '() '() d^ '(a (¬ b) c)))
-      '())
-|#
+      '((((())
+          (((¬ a) ((¬ b) c) ()) . _.0)
+          _.1
+          _.0))))
 
 (test "(solveᵒ f '(a (¬ b) c))"
       (run 1 (f d m f^ d^ rule) (step/decideᵒ f d m f^ d^ '(a (¬ b) c)))
