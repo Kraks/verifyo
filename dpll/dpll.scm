@@ -65,7 +65,7 @@ A literal is either a symbol, or a negation of a symbol (¬ x).
 
 (define (formulaᵒ f) (forall f clauseᵒ))
 
-(define (assignmentᵒ m) (forall m litᵒ))
+(define (modelᵒ m) (forall m litᵒ))
 
 (define (∩ x y z)
   (∨ [(emptyᵒ x) (emptyᵒ z)]
@@ -305,6 +305,7 @@ A literal is either a symbol, or a negation of a symbol (¬ x).
 
 (define (dpllᵒ f d m f^ d^ m^)
   (∨ [(emptyᵒ f)
+      (modelᵒ m)
       (== f f^) (== d d^) (== m m^)]
      [(non-emptyᵒ f)
       (emptyᵒ d)
@@ -313,8 +314,10 @@ A literal is either a symbol, or a negation of a symbol (¬ x).
       (== d d^)
       (== f f^)]
      [(∃ (f* d* m* rule)
-         (stepᵒ f  d  m  f* d* m* rule)
          (non-emptyᵒ m*)
+         ;(formulaᵒ f*)
+         ;(modelᵒ m*)
+         (stepᵒ f  d  m  f* d* m* rule)
          (dpllᵒ f* d* m* f^ d^ m^))]))
 
 (define (solveᵒ f m)
