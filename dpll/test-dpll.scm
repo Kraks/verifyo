@@ -411,12 +411,50 @@
       (run 1 (m) (solveᵒ f1 m))
       '((((¬ a) h (¬ i) g e (¬ f) (¬ d) b))))
 
+
+(test "run step/unitᵒ backward"
+      (run 1 (f d m f^ d^) (step/unitᵒ f d m f^ d^ '(a (¬ b) c)))
+      '(((((a))
+          _.0
+          ((¬ b) c)
+          ()
+          _.0))))
+
+(test "(step/unitᵒ '((a) ((¬ b))) '() '(c) '((a)) '() '((¬ b) c))"
+      (run 1 (q) (step/unitᵒ '((a) ((¬ b))) '() '(c) '((a)) '() '((¬ b) c)))
+      '((_.0)))
+
+(test "(step/unitᵒ '((a) ((¬ b))) '() '(c) '((a)) '() '((¬ b) c))"
+      (run 1 (f) (step/unitᵒ f '() '(c) '((a)) '() '((¬ b) c)))
+      '(((((¬ b)) (a)))))
+
+(test "(step/unitᵒ '((a) ((¬ b))) '() '(c) '((a)) '() '((¬ b) c))"
+      (run 1 (f m)
+           (non-emptyᵒ m)
+           ;; Note: non-empty m seems necessary for unit rule to be run backward,
+           ;; as m ↑ x can be trivially satisfied by letting m = ().
+           (step/unitᵒ f '() m '((a)) '() '((¬ b) c)))
+      '((((((¬ b)) (a)) (c)))))
+
 ;(display (run 1 (m) (solveᵒ '((1 2) ((¬ 2))) m)))
 ;(display (run 1 (m) (f/⊨ m '((1 2) ((¬ 2))))))
 
+#|
 (test "(solveᵒ f '(a (¬ b) c))"
-      (run 1 (f d m f^ d^ rule) (stepᵒ f d m f^ d^ '(a (¬ b) c) rule))
+      (run 1 (f d m d^)
+           (non-emptyᵒ f)
+           (dpllᵒ f d '() '() d^ '(a (¬ b) c)))
       '())
+|#
+
+(test "(solveᵒ f '(a (¬ b) c))"
+      (run 1 (f d m f^ d^ rule) (step/decideᵒ f d m f^ d^ '(a (¬ b) c)))
+      '(((((a . _.0))
+          _.1
+          ((¬ b) c)
+          ()
+          ((a ((a . _.0))) . _.1)
+          _.2))))
 
 ;======================================================
 

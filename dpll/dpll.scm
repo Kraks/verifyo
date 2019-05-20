@@ -314,6 +314,7 @@ A literal is either a symbol, or a negation of a symbol (¬ x).
       (== f f^)]
      [(∃ (f* d* m* rule)
          (stepᵒ f  d  m  f* d* m* rule)
+         (non-emptyᵒ m*)
          (dpllᵒ f* d* m* f^ d^ m^))]))
 
 (define (solveᵒ f m)
