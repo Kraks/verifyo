@@ -22,18 +22,21 @@ A literal is either a symbol, or a negation of a symbol (¬ x).
 
 (define (modelᵒ m) (forall m litᵒ))
 
-;; c/atomsᵒ does not contain duplicates
+(define (atomᵒ l a)
+  (∨ [(symnumᵒ l) (== a l)]
+     [(∃ (a^) (== l `(¬ ,a^)) (== a a^))]))
+
+;; c/atomsᵒ does not contain duplicates.
 (define (c/atomsᵒ c as)
   (∨ [(emptyᵒ c) (emptyᵒ as)]
      [(∃ (x x^ y xs as^)
          (== c `(,x . ,xs))
          (c/atomsᵒ xs as^)
-         (∨ [(symnumᵒ x) (== y x)]
-            [(== x `(¬ ,x^)) (== y x^)])
+         (atomᵒ x y)
          (∨ [(∈ y as^) (== as as^)]
             [(∉ y as^) (== as `(,y . ,as^))]))]))
 
-;; atomᵒ produces a list of fixed order, instead of an (unordered) set
+;; atomᵒ produces a list of fixed order, instead of an (unordered) set.
 (define (atomsᵒ f as)
   (foldᵒ f '() (lambda (acc c as*) (∃ (cas) (c/atomsᵒ c cas) (∪ acc cas as*))) as))
 
@@ -47,8 +50,7 @@ A literal is either a symbol, or a negation of a symbol (¬ x).
      [(∃ (x x^ y xs as^)
          (== c `(,x . ,xs))
          (c/atomsᵒ xs as^)
-         (∨ [(== x `(¬ ,x^)) (== y x^)]
-            [(symnumᵒ x) (== y x)])
+         (atomᵒ x y)
          (== as `(,y . ,as^)))]))
 
 (define (all-atomsᵒ f as)

@@ -18,6 +18,13 @@
 (define ∈ membero)
 (define ∉ not-membero)
 
+#|
+(define-syntax conde-∈
+  (syntax-rules ()
+    ((_ (x xs) [rel-in ...] [rel-not-in ...])
+     )))
+|#
+
 (define-syntax listᵒ
   (syntax-rules (← with)
     ((_ ((x . xs) ← lst) (with v ...) rel ...)
