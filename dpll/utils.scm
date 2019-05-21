@@ -41,7 +41,7 @@
      (forall xs (lambda (x) rel ...)))))
 
 (define-syntax ∃
-  (syntax-rules (←)
+  (syntax-rules (← =)
     ((_ (x = (f xs ...)) rel ...)
      (fresh (x) (f xs ... x) rel ...))
     ((_ (x ← xs) rel ...)
