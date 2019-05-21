@@ -1,7 +1,7 @@
 (load "../mk/mk.scm")
 (load "../mk/test-check.scm")
 (load "dpll.scm")
-(load "parse-cnf.scm")
+(load "parse-dimacs.scm")
 
 (define uf20-01 (parse-dimacs-file "uf20-91/uf20-01.cnf"))
 (define uf20-02 (parse-dimacs-file "uf20-91/uf20-02.cnf"))
