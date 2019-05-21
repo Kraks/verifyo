@@ -33,6 +33,7 @@ A literal is either a symbol, or a negation of a symbol (¬ x).
             [(∉ y as^) (== as `(,y . ,as^))]))]))
 
 ;; atomᵒ produces a list of fixed order, instead of an (unordered) set
+;; TODO: this is too slow... 1. fold/append, and then remove duplicates 2 or don't have to remove dups.
 (define (atomsᵒ f as)
   (foldᵒ f '() (lambda (acc c as*) (∃ (cas) (c/atomsᵒ c cas) (∪ acc cas as*))) as))
 
