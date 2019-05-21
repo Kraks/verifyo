@@ -102,6 +102,18 @@
       (run* (q) (∩'(a b) '(a b c) q))
       '(((a b))))
 
+(test "'(a b) ∪ '(a b c d) ≡ {q}"
+      (run* (q) (∪ '(a b) '(a b c d) q))
+      '(((a b c d))))
+
+(test "'(e f) ∪ '(a b c d) ≡ {q}"
+      (run* (q) (∪ '(e f) '(a b c d) q))
+      '(((e f a b c d))))
+
+(test "'() ∪ '(a b c d) ≡ {q}"
+      (run* (q) (∪ '() '(a b c d) q))
+      '(((a b c d))))
+
 ;======================================================
 
 (test "(negᵒ p (¬ p))"
@@ -539,3 +551,16 @@
 (test "(finalo '((¬ a) (¬ b) c) '((a) (b) (c a) (b c)))"
       (run 1 (q) (finalo '((¬ a) (¬ b) c) '((a) (b) (c a) (b c))))
       '((_.0)))
+
+(test "(atomsᵒ '(a b c) '(a b c))"
+      (run 1 (q) (c/atomsᵒ '(a b c) q))
+      '(((a b c))))
+
+(test "(atomsᵒ '(a (¬ b) c) '(a b c))"
+      (run 1 (q) (c/atomsᵒ '(a (¬ b) c) q))
+      '(((a b c))))
+
+(test "(atomsᵒ '(a (¬ b) c a c b (¬ a)) '(c b a))"
+      (run 1 (q) (c/atomsᵒ '(a (¬ b) c a c b (¬ a)) q))
+      '(((c b a))))
+

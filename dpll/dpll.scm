@@ -78,6 +78,28 @@ A literal is either a symbol, or a negation of a symbol (¬ x).
                 [(∉ a y)
                  (∩ d y z)]))]))
 
+(define (∪ x y z)
+  (∨ [(emptyᵒ x) (== y z)]
+     [(emptyᵒ y) (== x z)]
+     [(fresh (a d z^)
+             (== x `(,a . ,d))
+             (conde
+              [(∈ a y) (∪ d y z)]
+              [(∉ a y)
+               (∪ d y z^)
+               (== z `(,a . ,z^))]))]))
+
+(define (c/atomsᵒ c as)
+  (∨ [(emptyᵒ c) (emptyᵒ as)]
+     [(∃ (x x^ y xs as^)
+         (== c `(,x . ,xs))
+         (c/atomsᵒ xs as^)
+         (∨ [(== x `(¬ ,x^)) (== y x^)]
+            [(=/= x `(¬ ,x^)) (== y x)])
+         (∨ [(∈ y as^) (== as as^)]
+            [(∉ y as^) (== as `(,y . ,as^))]))]))
+
+
 (define (negᵒ p q)
   (∨ [(∃ (p^)
          (== p `(¬ ,p^))
