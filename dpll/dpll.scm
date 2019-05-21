@@ -22,24 +22,40 @@ A literal is either a symbol, or a negation of a symbol (¬ x).
 
 (define (modelᵒ m) (forall m litᵒ))
 
+;; c/atomsᵒ does not contain duplicates
 (define (c/atomsᵒ c as)
   (∨ [(emptyᵒ c) (emptyᵒ as)]
      [(∃ (x x^ y xs as^)
          (== c `(,x . ,xs))
          (c/atomsᵒ xs as^)
-         (∨ [(== x `(¬ ,x^)) (== y x^)]
-            [(=/= x `(¬ ,x^)) (== y x)])
+         (∨ [(symnumᵒ x) (== y x)]
+            [(== x `(¬ ,x^)) (== y x^)])
          (∨ [(∈ y as^) (== as as^)]
             [(∉ y as^) (== as `(,y . ,as^))]))]))
 
 ;; atomᵒ produces a list of fixed order, instead of an (unordered) set
-;; TODO: this is too slow... 1. fold/append, and then remove duplicates 2 or don't have to remove dups.
 (define (atomsᵒ f as)
   (foldᵒ f '() (lambda (acc c as*) (∃ (cas) (c/atomsᵒ c cas) (∪ acc cas as*))) as))
 
 ;; The formula `f` should at least uses atoms `as`
 (define (atoms-⊇ᵒ f as)
   (∃ (fas) (atomsᵒ f fas)
+     (∀ (a ← as) (∈ a fas))))
+
+(define (c/all-atomsᵒ c as)
+  (∨ [(emptyᵒ c) (emptyᵒ as)]
+     [(∃ (x x^ y xs as^)
+         (== c `(,x . ,xs))
+         (c/atomsᵒ xs as^)
+         (∨ [(== x `(¬ ,x^)) (== y x^)]
+            [(symnumᵒ x) (== y x)])
+         (== as `(,y . ,as^)))]))
+
+(define (all-atomsᵒ f as)
+  (foldᵒ f '() (lambda (acc c as*) (∃ (cas) (c/all-atomsᵒ c cas) (appendᵒ acc cas as*))) as))
+
+(define (all-atoms-⊇ᵒ f as)
+  (∃ (fas) (all-atomsᵒ f fas)
      (∀ (a ← as) (∈ a fas))))
 
 (define (negᵒ p q)
