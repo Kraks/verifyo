@@ -99,7 +99,6 @@ A literal is either a symbol, or a negation of a symbol (¬ x).
          (∨ [(∈ y as^) (== as as^)]
             [(∉ y as^) (== as `(,y . ,as^))]))]))
 
-
 (define (negᵒ p q)
   (∨ [(∃ (p^)
          (== p `(¬ ,p^))
@@ -203,6 +202,9 @@ A literal is either a symbol, or a negation of a symbol (¬ x).
      [(∃ (¬x ← c) (negᵒ x ¬x) (∉ x c) (removeᵒ c ¬x c^))]
      [(↑ c x) (== c c^)]))
 
+;; mapfilter takes a list `xs`, a predicate relation `p`, and transformer relation `f`,
+;; then transforms every element `x` in `xs`, and only keeps those transformed values who
+;; satifies `p`.
 (define (mapfilterᵒ xs p f ys)
   (∨ [(emptyᵒ xs) (emptyᵒ ys)]
      [(∃ (a a^ d r ys^)
@@ -215,8 +217,8 @@ A literal is either a symbol, or a negation of a symbol (¬ x).
             [(== r #f)
              (mapfilterᵒ d p f ys)]))]))
 
+;; Unit propagation: applying x to f, and obtaining f^.
 ;; Note: an empty disjunction is false; an empty conjunction is true
-
 (define (unitpropᵒ f x f^)
   (∨ [(emptyᵒ f) (emptyᵒ f^)]
      [(mapfilterᵒ
