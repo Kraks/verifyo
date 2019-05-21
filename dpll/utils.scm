@@ -15,8 +15,8 @@
            (=/= a x)
            (not-membero x d))]))
 
-(define (∈ x m) (membero x m))
-(define (∉ x m) (not-membero x m))
+(define ∈ membero)
+(define ∉ not-membero)
 
 (define-syntax listᵒ
   (syntax-rules (← with)
@@ -122,6 +122,8 @@
            (== xs `(,a . ,d))
            (∈ a ys)
            ((⊆* ∈) d ys))])))
+
+(define ⊆ (⊆* ∈))
 
 (define (removeᵒ xs x ys)
   (∨ [(emptyᵒ xs) (emptyᵒ ys)]

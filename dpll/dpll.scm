@@ -73,15 +73,15 @@ A literal is either a symbol, or a negation of a symbol (¬ x).
 (define (f/⊭ m f)
   (∃ (c ← f) (c/⊭ m c)))
 
-(define (⊆ xs ys) ((⊆* (lambda (a m) (↓ m a))) xs ys))
+(define ⊆↓ (⊆* (lambda (a m) (↓ m a))))
 
 ;; should be the final state: all the variables are assigned.
 (define (finalo m f)
   (∃ (vars vars^ c cs)
      (flattenᵒ f vars^)
      (rem-dupᵒ vars^ vars)
-     (⊆ m vars)
-     (⊆ vars m)))
+     (⊆↓ m vars)
+     (⊆↓ vars m)))
 
 (define (c/unitpropᵒ c x c^)
   (∨ [(∈ x c) (== c^ #t)]
