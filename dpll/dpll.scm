@@ -91,12 +91,11 @@ A literal is either a symbol, or a negation of a symbol (¬ x).
 ;; Unit propagation: applying x to f, and obtaining f^.
 ;; Note: an empty disjunction is false; an empty conjunction is true
 (define (unitpropᵒ f x f^)
-  (∨ [(emptyᵒ f) (emptyᵒ f^)]
-     [(mapfilterᵒ
-       f
-       (lambda (a r) (conde [(== a #t) (== r #f)] [(=/= a #t) (== r #t)]))
-       (lambda (c c^) (c/unitpropᵒ c x c^))
-       f^)]))
+  (mapfilterᵒ
+    f
+    (lambda (a r) (conde [(== a #t) (== r #f)] [(=/= a #t) (== r #t)]))
+    (lambda (c c^) (c/unitpropᵒ c x c^))
+    f^))
 
 (define-syntax ∃/unit
   (syntax-rules (←)
