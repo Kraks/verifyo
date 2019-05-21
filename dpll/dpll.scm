@@ -7,10 +7,6 @@ A clauses is a disjunction of literals, i.e., a list of literals.
 A literal is either a symbol, or a negation of a symbol (¬ x).
 |#
 
-(define (emptyᵒ l) (== l '()))
-
-(define (non-emptyᵒ l) (=/= l '()))
-
 (define (symnumᵒ x)
   (∨ [(symbolo x)] [(numbero x)]))
 
@@ -35,6 +31,15 @@ A literal is either a symbol, or a negation of a symbol (¬ x).
             [(=/= x `(¬ ,x^)) (== y x)])
          (∨ [(∈ y as^) (== as as^)]
             [(∉ y as^) (== as `(,y . ,as^))]))]))
+
+;; atomᵒ produces a list of fixed order, instead of an (unordered) set
+(define (atomsᵒ f as)
+  (foldᵒ f '() (lambda (acc c as*) (∃ (cas) (c/atomsᵒ c cas) (∪ acc cas as*))) as))
+
+;; The formula `f` should at least uses atoms `as`
+(define (atoms-⊇ᵒ f as)
+  (∃ (fas) (atomsᵒ f fas)
+     (∀ (a ← as) (∈ a fas))))
 
 (define (negᵒ p q)
   (∨ [(∃ (p^)

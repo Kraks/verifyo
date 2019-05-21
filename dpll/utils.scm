@@ -149,3 +149,13 @@
             [(== r #f)
              (mapfilterᵒ d p f ys)]))]))
 
+(define (foldᵒ xs acc f y)
+  (∨ [(emptyᵒ xs) (== y acc)]
+     [(∃ (a d y^)
+         (== xs `(,a . ,d))
+         (f acc a y^)
+         (foldᵒ d y^ f y))]))
+
+(define (emptyᵒ l) (== l '()))
+
+(define (non-emptyᵒ l) (=/= l '()))
