@@ -201,7 +201,7 @@ A literal is either a symbol, or a negation of a symbol (¬ x).
           (== m^ `(,x . ,m))))
 
 #|
-  ∃C, x: C∈F  x∈C  M↑x  F'=F[x] D'=((x,M,F), D)  M'=(x, M)
+  ∃C, x: C∈F  x∈C  M↑x  F'=F[x]  D'=((x,M,F), D)  M'=(x, M)
 ----------------------------------------------------------- decide
               ⟨F, D, M⟩ ↦ ⟨F', D', M'⟩
 |#
@@ -254,8 +254,7 @@ A literal is either a symbol, or a negation of a symbol (¬ x).
   (∨ [(emptyᵒ f)
       (modelᵒ m)
       (== f f^) (== d d^) (== m m^)]
-     [;(non-emptyᵒ f)
-      (emptyᵒ d)
+     [(emptyᵒ d)
       (∃/mt-clause (f))
       (== m^ 'fail)
       (== d d^)
