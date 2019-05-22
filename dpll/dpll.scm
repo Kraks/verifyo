@@ -188,6 +188,11 @@ A literal is either a symbol, or a negation of a symbol (¬ x).
              (== ys `(,a . ,ys^))]))]))
 
 ;; Unit Propogate, only eliminates real unit clauses
+#|
+    ∃x: (x)∈F   M↑x   F'=F[x]   M'=(x, M)
+--------------------------------------------- unit
+         ⟨F, D, M⟩ ↦ ⟨F', D, M'⟩
+|#
 (define (step/unitᵒ f d m f^ d^ m^)
   (∃/unit ((x) ← f)
           (↑ m x)
@@ -195,6 +200,11 @@ A literal is either a symbol, or a negation of a symbol (¬ x).
           (== d^ d)
           (== m^ `(,x . ,m))))
 
+#|
+  ∃C, x: C∈F  x∈C  M↑x  F'=F[x] D'=((x,M,F), D)  M'=(x, M)
+----------------------------------------------------------- decide
+              ⟨F, D, M⟩ ↦ ⟨F', D', M'⟩
+|#
 (define (step/decideᵒ f d m f^ d^ m^)
   (∃/lit (x ← c ← f)
          (↑ m x)
@@ -203,6 +213,11 @@ A literal is either a symbol, or a negation of a symbol (¬ x).
          (== m^ `(,x . ,m))))
 
 ;; Backtrack, just back jump to the most recent decision
+#|
+    ()∈F  D=((x,^M,^F), D')  F'=F[¬x]  M'=(¬x, M)
+----------------------------------------------------- backtrack
+             ⟨F, D, M⟩ ↦ ⟨F', D', M'⟩
+|#
 (define (step/backtrackᵒ f d m f^ d^ m^)
   (∃/mt-clause (f) (with x ¬x ^m ^f)
                (pop-decisionᵒ d x ^m ^f d^)
@@ -226,11 +241,20 @@ A literal is either a symbol, or a negation of a symbol (¬ x).
       (step/backtrackᵒ f d m f^ d^ m^)
       (== rule 'backtrack)]))
 
+#|
+      F = ()
+------------------- succeed
+  ⟨F, D, M⟩ ↦ True
+
+     ()∈F  D=()
+------------------- fail
+  ⟨F, D, M⟩ ↦ False
+|#
 (define (dpllᵒ f d m f^ d^ m^)
   (∨ [(emptyᵒ f)
       (modelᵒ m)
       (== f f^) (== d d^) (== m m^)]
-     [(non-emptyᵒ f)
+     [;(non-emptyᵒ f)
       (emptyᵒ d)
       (∃/mt-clause (f))
       (== m^ 'fail)
